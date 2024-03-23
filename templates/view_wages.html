@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Labour Wages{% endblock %}
+
+{% block content %}
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('view_contracts') }}">Contracts</a></li>
+            <li><a href="{{ url_for('view_users') }}">Users</a></li>
+            <li><a href="{{ url_for('view_wages') }}">Wages</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+
+    <h2>Labour Wages</h2>
+
+    <h3>Add Category</h3>
+    <form class="styled-form" method="post" action="{{ url_for('add_wage') }}">
+        <!-- Add User Form -->
+        <div class="form-row">
+            <label for="emp_category">Employee Category:</label>
+            <select id="emp_category" name="emp_category" required>
+                <option value="skilled">Skilled</option>
+                <option value="semi-skilled">Semi-Skilled</option>
+                <option value="unskilled">UnSkilled</option>
+            </select><br>
+        </div>
+
+
+        <div class="form-row">
+            <label for="amount">Amount:</label>
+            <input type="text" id="amount" name="amount" required><br>
+        </div>
+
+        <input type="submit" value="submit">
+    </form>
+
+    <!-- Display flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+
+    <h3>Update Wages</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Sl.No</th>
+                <th>Category</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for wage in wages %}
+                <tr>
+                    <td>{{ loop.index0 + 1 }}</td>
+                    <td>{{ wage.emp_category }}</td>
+                    <td>{{ wage.wage }}</td>
+                    <td>
+
+                        <!-- Update Form -->
+                        <form method="post" action="{{ url_for('update_wage', category=wage.emp_category) }}">
+                            
+         
+                            <label for="amount_update">New Wage:</label>
+                            <input type="text" id="amount_update" name="amount_update" required><br>
+                            <input type="submit" value="Update">
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+{% endblock %}
+
+

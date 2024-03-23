@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Create Bill
+{% endblock %}
+
+{% block content %}
+
+    <nav>
+                
+        <ul>
+            <li><a href="{{ url_for('manpower') }}">Manpower</a></li>
+            <li><a href="{{ url_for('attendance') }}">Attendance</a></li>
+            <li><a href="{{ url_for('create_bill') }}">Bill Abstract</a></li>
+            <li><a href="{{ url_for('create_bill') }}">Bill Docs</a></li>
+            <li><a href="{{ url_for('create_bill') }}">Contract Docs</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+    <h2>Create Bill Abstarct</h2>
+   <form class="styled-form" action="{{ url_for('create_bill') }}" method="post">
+        <div class="form-row">
+            <label for="contract_no">Contract No:</label><br>
+            <select id="contract_no" name="contract_no">
+                {% for contract in contracts %}
+                    <option value="{{ contract.contract_no }}">{{ contract.contract_no }}</option>
+                {% endfor %}
+            </select><br>
+        </div>
+
+        <div class="form-row">
+            <label for="contract_type">Contract Type:</label><br>
+            <select id="contract_type" name="contract_type" required>
+                <option value="manpower">Manpower</option>
+                <option value="work_package">work_package</option>
+            </select><br>
+        </div>
+
+        <div class="form-row">
+            <label for="rar_no">RAR No:</label><br>
+            <select id="rar_no" name="rar_no">
+                {% for i in range(1, 25) %}
+                    <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+            </select><br>
+        </div>
+
+
+        <div class="form-row">
+            <label for="ge_no">Gate Entry NO:</label><br>
+            <input type="number" id="ge_no" name="ge_no"><br>
+        </div>
+
+        <div class="form-row">
+            <label for="ge_date">Gate Entry Date:</label><br>
+            <input type="date" id="ge_date" name="ge_date"><br>
+        </div>
+
+        <div class="form-row">
+            <label for="rr_no">RR NO:</label><br>
+            <input type="number" id="rr_no" name="rr_no"><br>
+        </div>
+
+        <div class="form-row">
+            <label for="invoice_no">Invoice No:</label><br>
+            <input type="text" id="invoice_no" name="invoice_no"><br>
+        </div>
+
+        <div class="form-row">
+            <label for="invoice_date">Invoice Date:</label><br>
+            <input type="date" id="invoice_date" name="invoice_date"><br>
+        </div>
+
+        <div class="form-row">
+            <label for="invoice_amount">Invoice Amount:</label><br>
+            <input type="text" id="invoice_amount" name="invoice_amount"><br>
+        </div>
+
+
+        <div class="form-row">
+            <label for="penalty">Penalty:</label><br>
+            <input type="text" id="penalty" name="penalty"><br>
+        </div>
+
+        <input type="submit" value="Generate">
+        <p> Please wait for few minutes after clicking Generate Button.</p>
+    </form>
+
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    {% if message== "generate_ifs_bill" %}
+    <p>Click Proceed Button to generate IFS Bill</p>
+    <form action="{{ url_for('generate_ifs_bill') }}" method="POST">
+        <button type="submit">Proceed</button>
+    </form>
+    {% endif %}
+
+{% endblock %}

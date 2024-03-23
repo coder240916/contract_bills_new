@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block title %}Contracts{% endblock %}
+
+{% block content %}
+    <nav>
+        <ul>
+            
+            <li><a href="{{ url_for('view_contracts') }}">Contracts</a></li>
+            <li><a href="{{ url_for('view_users') }}">Users</a></li>
+            <li><a href="{{ url_for('view_wages') }}">Wages</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+    <h2>Contracts</h2>
+
+    <h3>Add Contract</h3>
+    <form class="styled-form" method="post" action="{{ url_for('add_contract') }}">
+        <div class="form-row">
+            <label for="contract_no">Contract Number:</label>
+            <input type="text" id="contract_no" name="contract_no" required><br>
+        </div>
+
+        <div class="form-row">
+            <label for="contract_description">Contract Description:</label>
+            <input type="text" id="contract_description" name="contract_description" required><br>
+        </div>
+
+        <div class="form-row">
+            <label for="eic_pbno">EIC PB Number:</label>
+            <input type="number" id="eic_pbno" name="eic_pbno" required><br>
+        </div>
+
+        <div class="form-row">
+            <label for="oic_pbno">OIC PB Number:</label>
+            <input type="number" id="oic_pbno" name="oic_pbno" required><br>
+        </div>
+
+        <div class="form-row">
+            <label for="contract_type">Contract Type:</label>
+            <select id="contract_type" name="contract_type" required>
+                <option value="manpower">Manpower</option>
+                <option value="work_package">Work Package</option>
+            </select><br>
+        </div>
+
+        <div class="form-row">
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" name="start_date" required><br>
+        </div>
+
+        <div class="form-row">
+            <label for="duration_months">Duration (months):</label>
+            <input type="number" id="duration_months" name="duration_months" required><br>
+        </div>
+
+        <div class="form-row">
+            <label for="bill_frequency">Bill Frequency:</label>
+            <select id="bill_frequency" name="bill_frequency" required>
+                <option value="1">Monthly</option>
+                <option value="3">Quarterly</option>
+            </select><br>
+        </div>
+
+        <div class="form-row">
+            <label for="contract_value">Contract Value:</label>
+            <input type="text" id="contract_value" name="contract_value" pattern="\d+(\.\d+)?" title="Please enter a valid decimal number" required><br>
+        </div>
+
+        <div class="form-row">
+            <label for="vendor_id">Vendor Code:</label>
+            <input type="text" id="vendor_id" name="vendor_id" required><br>
+        </div>
+
+        <div class="form-row">
+            <label for="vendor_name">Vendor Name:</label>
+            <input type="text" id="vendor_name" name="vendor_name" required><br>
+        </div>
+
+        <div class="form-row">
+            <label for="vendor_address">Vendor Address :</label>
+            <input type="text" id="vendor_address" name="vendor_address" required><br>
+        </div>
+
+        <div class="form-row">
+            <label for="vendor_gst">Vendor GST :</label>
+            <input type="text" id="vendor_gst" name="vendor_gst" required><br>
+        </div>
+
+        <div class="form-row">
+            <label for="eic_dept_no">EIC Dept Number :</label>
+            <input type="text" id="eic_dept_no" name="eic_dept_no" required><br>
+        </div>
+
+        <div class="form-row">
+            <label for="work_order_no">Work Order NO:</label>
+            <input type="text" id="work_order_no" name="work_order_no" required><br>
+        </div>
+
+        <div class="form-row">
+            <label for="gem_order_no">GEM Order NO:</label>
+            <input type="text" id="gem_order_no" name="gem_order_no" required><br>
+        </div>
+
+
+
+        <input type="submit" value="Add Contract">
+    </form>
+
+    {% if message %}
+    <h2>{{ message }}</h2>
+    {% endif %}
+
+
+    <h3>Existing Contracts</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Contract Number</th>
+                <th>Contract Description</th>
+                <th>EIC PB Number</th>
+                <th>OIC PB Number</th>
+                <th>Contract Type</th>
+                <th>Start Date</th>
+                <th>Duration in Months</th>
+                <th>Billing Frequency(Months)</th>
+                <th>Contract Value(Rs.)</th>
+                <th>Vendor ID</th>
+                <th>Vendor Name</th>
+                <th>Vendor Address</th>
+                <th>EIC Dept No </th>
+                <th>WO NO</th>
+                <th>GEM Order NO</th>
+
+                <!-- Add more headers for contract_type, start_date, duration_months, bill_frequency as needed -->
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for contract in contracts %}
+                <tr>
+                    <td>{{ contract.contract_no }}</td>
+                    <td>{{ contract.contract_description }}</td>
+                    <td>{{ contract.eic_pbno }}</td>
+                    <td>{{ contract.oic_pbno }}</td>
+                    <td>{{ contract.contract_type }}</td>
+                    <td>{{ contract.start_date }}</td>
+                    <td>{{ contract.duration_months }}</td>
+                    <td>{{ contract.bill_frequency }}</td>
+                    <td>{{ contract.contract_value }}</td>
+                    <td>{{ contract.vendor_id }}</td>
+                    <td>{{ contract.vendor_name }}</td>
+                    <td>{{ contract.vendor_address }}</td>
+                    <td>{{ contract.eic_dept_no }}</td>
+                    <td>{{ contract.work_order_no }}</td>
+                    <td>{{ contract.gem_contract_no }}</td>
+
+                    <!-- Add more cells for contract_type, start_date, duration_months, bill_frequency as needed -->
+                    <td>
+                        <!-- Delete Form -->
+                        <form method="post" action="{{ url_for('delete_contract', contract_no=contract.contract_no) }}">
+                            <input type="submit" value="Delete">
+                        </form>
+                        <!-- Update Form -->
+                        <form method="post" action="{{ url_for('update_contract', contract_no=contract.contract_no) }}">
+                            <label for="eic_pbno_update">New EIC PB Number:</label>
+                            <input type="number" id="eic_pbno_update" name="eic_pbno_update" required><br>
+                            <label for="oic_pbno_update">New OIC PB Number:</label>
+                            <input type="number" id="oic_pbno_update" name="oic_pbno_update" required><br>
+                            <input type="submit" value="Update">
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- <h3>Existing Contracts</h3>
+    <ul>
+        {% for contract in contracts %}
+            <li>
+                <strong>Contract Number:</strong> {{ contract.contract_no }}, 
+                <strong>EIC PB Number:</strong> {{ contract.eic_pbno }},
+                <strong>OIC PB Number:</strong> {{ contract.oic_pbno }},
+                <strong>Contract Type:</strong> {{ contract.contract_type }},
+                <strong>Start Date:</strong> {{ contract.start_date }},
+                <strong>Duration (months):</strong> {{ contract.duration_months }},
+                <strong>Bill Frequency:</strong> {% if contract.bill_frequency == 1 %}Monthly{% else %}Quarterly{% endif %}<br>
+                
+                
+                <form method="post" action="{{ url_for('delete_contract', contract_no=contract.contract_no) }}">
+                    <input type="submit" value="Delete">
+                </form>
+
+                
+                <form method="post" action="{{ url_for('update_contract', contract_no=contract.contract_no) }}">
+                    <label for="eic_pbno_update">New EIC PB Number:</label>
+                    <input type="number" id="eic_pbno_update" name="eic_pbno_update" required><br>
+                    <label for="oic_pbno_update">New OIC PB Number:</label>
+                    <input type="number" id="oic_pbno_update" name="oic_pbno_update" required><br>
+                    <input type="submit" value="Update">
+                </form>
+            </li>
+        {% endfor %}
+    </ul> -->
+
+
+{% endblock %}

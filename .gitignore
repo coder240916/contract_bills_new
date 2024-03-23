@@ -1,0 +1,19 @@
+# Virtual environment
+venv/
+
+# Byte-compiled files
+*.pyc
+
+# Environment variables file (e.g., .env)
+.env
+
+# IDE files
+.vscode/
+.idea/
+
+# Log files
+*.log
+
+# Dependency directories
+/node_modules/
+/bower_components/

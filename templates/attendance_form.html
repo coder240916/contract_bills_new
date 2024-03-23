@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}Manpower{% endblock %}
+
+{% block content %}
+
+    <nav>
+            
+        <ul>
+            <li><a href="{{ url_for('manpower') }}">Manpower</a></li>
+            <li><a href="{{ url_for('attendance') }}">Attendance</a></li>
+            <li><a href="{{ url_for('create_bill') }}">Bill Abstract</a></li>
+            <li><a href="{{ url_for('create_bill') }}">Bill Docs</a></li>
+            <li><a href="{{ url_for('create_bill') }}">Contract Docs</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+
+    <h1>Attendance Form</h1>
+
+   <form class="styled-form" id="attendance-form" action="{{ url_for('attendance') }}" method="post">
+        <div class="form-row">
+            <label for="month_select">Select Month:</label>
+            <select id="month_select" name="month_select">
+                {% for month,data in month_dict.items() %}
+                    {% if session_attendance_data %}
+                        {% if data == session_attendance_data["selected_month"] %}
+                            <option value="{{ data }}" selected>{{ month }}</option>
+                        {% else %}
+                            <option value="{{ data }}" >{{ month }}</option>
+                        {% endif %}
+                    {% else %}
+                        <option value="{{ data }}">{{ month }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label for="contract_select">Select Contract:</label>
+            <select id="contract_select" name="contract_select">
+                {% for contract in contracts %}
+                    <option value="{{ contract.contract_no }}">{{ contract.contract_no }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button id="submit_btn" type="submit">Submit</button>
+    </form>
+    <br><br>
+
+
+    {% if attendance_data %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul>
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <h2>Attendance for the month of {{ session_attendance_data["month_name"] }},{{ session_attendance_data["year"] }} </h2>
+        <table border="1">
+            <tr>
+                <th></th>
+                {% for date in attendance_data['date_format'] %}
+                    {% if attendance_data['sunday'][loop.index0] == 'sunday' %}
+                        <th class="sunday">{{ date }}</th>
+                    {% else %}
+                        <th>{{ date }}</th>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            {% for name, data in attendance_data.items() %}
+                {% if name not in ['date_format', 'sunday'] %}
+                <tr>
+                    <td>{{ name }}</td>
+                    {% for value in data %}
+                        {% if attendance_data['sunday'][loop.index0] == 'sunday' %}
+                            <td class="sunday" contenteditable="true" data-value="{{ value }}">{{ value }}</td>
+                        {% elif attendance_data['date_format'][loop.index0] == 'DP' %}
+                            <td class="total_days" contenteditable="false" data-value="{{ value }}">{{ value }}</td>
+                        {% else %}
+                            <td contenteditable="true" data-value="{{ value }}">{{ value }}</td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+
+        <form id="save-attendance-form" action="/save_attendance" method="post">
+            <input type="hidden" id="attendance_data" name="attendance_data" value="">
+            <button type="submit" id="save-button">Save Attendance</button>
+        </form>
+
+        <form class="styled-form" id="generate-attendance-form" action="/download_attendance" method="post">
+
+            <div class="form-row">
+                <label for="prof_tax">Professional Tax:</label>
+                <input type="number" id="prof_tax" name="prof_tax" value="0" required><br>
+            </div>
+
+            <div class="form-row">
+                <label for="ld">LD Amount :</label>
+                <input type="number" id="ld" name="ld" value='0' required ><br>
+            </div>
+
+            <div class="form-row">
+                <label for="penalty">Penalty Amount :</label>
+                <input type="number" id="penalty" name="penalty" value='0' required ><br>
+            </div>
+
+
+            <div class="form-row">
+                <label for="taxes">Taxes Amount :</label>
+                <input type="number" id="taxes" name="taxes" value='0' required ><br>
+            </div>
+
+            <div class="form-row">
+                <label for="other_recovery"> Other Recovery Amount  :</label>
+                <input type="number" id="other_recovery" name="other_recovery" value='0' required ><br>
+            </div>
+
+            <button type="submit" id="download-button">Download Excel Files</button>
+
+        </form>
+
+    {% endif %}
+
+
+
+    <script>
+
+        if ("{{ auto_submit }}" === "True") {
+            document.getElementById("submit_btn").click()
+            }
+
+        document.getElementById("save-button").addEventListener("click", function() {
+            var cells = document.querySelectorAll("[contenteditable=true]");
+            var isValid = true;
+            var attendanceData = [];
+
+            cells.forEach(function(cell) {
+                var value = parseFloat(cell.textContent);
+                if (isNaN(value) || value < 0 || value > 2) {
+                    isValid = false;
+                    alert("Please enter a value between 0 and 2 for attendance.");
+                    event.preventDefault(); // Prevent form submission
+                    
+                }
+                attendanceData.push(value)
+            });
+
+            console.log(JSON.stringify(attendanceData))
+
+            if (isValid) {
+                document.getElementById("attendance_data").value = JSON.stringify(attendanceData);
+                document.getElementById("save-attendance-form").submit();
+            }
+        });
+
+
+    </script>
+{% endblock %}

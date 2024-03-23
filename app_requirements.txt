@@ -1,0 +1,8 @@
+@app.route('/')
+def index():
+    # Combine attendance data with 'sunday' information
+    combined_data = {}
+    for key in attendance_data.keys():
+        combined_data[key] = zip(attendance_data[key], attendance_data['sunday'])
+
+    return render_template('attendance_form.html', attendance_data=combined_data)

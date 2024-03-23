@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Manpower{% endblock %}
+
+{% block content %}
+
+    <nav>
+                
+        <ul>
+            <li><a href="{{ url_for('manpower') }}">Manpower</a></li>
+            <li><a href="{{ url_for('attendance') }}">Attendance</a></li>
+            <li><a href="{{ url_for('create_bill') }}">Bill Abstract</a></li>
+            <li><a href="{{ url_for('create_bill') }}">Bill Docs</a></li>
+            <li><a href="{{ url_for('create_bill') }}">Contract Docs</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+
+    <h2>Manpower</h2>
+
+    <h3>Add Manpower</h3>
+    <form class="styled-form" method="post" action="{{ url_for('add_manpower') }}">
+
+        <div class="form-row">
+            <label for="punch_id">Employee Punch ID:</label>
+            <input type="number" id="punch_id" name="punch_id" required><br>
+        </div>
+
+        <div class="form-row">
+            <label for="emp_name">Employee Name:</label>
+            <input type="text" id="emp_name" name="emp_name" required><br>
+        </div>
+
+
+        <div class="form-row">
+            <label for="contract_no">Contract No:</label><br>
+            <select id="contract_no" name="contract_no">
+                {% for contract in contracts %}
+                    <option value="{{ contract.contract_no }}">{{ contract.contract_no }}</option>
+                {% endfor %}
+            </select><br>
+        </div>
+
+        <div class="form-row">
+            <label for="esi_no">ESI  Number:</label>
+            <input type="number" id="esi_no" name="esi_no" required><br>
+        </div>
+
+        <div class="form-row">
+            <label for="pf_no">UAN  Number:</label>
+            <input type="number" id="pf_no" name="pf_no" required><br>
+        </div>
+
+        <div class="form-row">
+            <label for="bank_ac_no">BANK ACC  Number:</label>
+            <input type="number" id="bank_ac_no" name="bank_ac_no" required><br>
+        </div>
+
+        <div class="form-row">
+            <label for="dt_of_join">Joining Date:</label>
+            <input type="date" id="dt_of_join" name="dt_of_join" required><br>
+        </div>
+
+        <div class="form-row">
+            <label for="emp_category">Employee Category:</label>
+            <select id="emp_category" name="emp_category" required>
+                <option value="skilled">Skilled</option>
+                <option value="semi-skilled">Semi-Skilled</option>
+                <option value="unskilled">UnSkilled</option>
+            </select><br>
+        </div>
+
+        <div class="form-row">
+            <label for="bank_acc_ifsc_code">BANK IFSC Code:</label>
+            <input type="text" id="bank_acc_ifsc_code" name="bank_acc_ifsc_code" required><br>
+        </div>
+
+
+        <input type="submit" value="Add Manpower">
+    </form>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+
+    <h3>Existing Contracts</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Emp Punch ID</th>
+                <th>Empl Name</th>
+                <th>Contract Number</th>
+                <th>ESI NO</th>
+                <th>UAN NO</th>
+                <th>BANK ACC NO</th>
+                <th>Date of Joining</th>
+                <th>Emp Category</th>
+                <th>Bank IFSC Code</th>
+                
+                <!-- Add more headers for contract_type, start_date, duration_months, bill_frequency as needed -->
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for employee in employees %}
+                <tr>
+                    <td>{{ employee.emp_punch_id }}</td>
+                    <td>{{ employee.emp_name }}</td>
+                    <td>{{ employee.contract_no }}</td>
+                    <td>{{ employee.esi_no }}</td>
+                    <td>{{ employee.pf_no }}</td>
+                    <td>{{ employee.bank_acc_no }}</td>
+                    <td>{{ employee.date_of_joining }}</td>
+                    <td>{{ employee.emp_category }}</td>
+                    <td>{{ employee.bank_acc_ifsc_code }}</td>
+                    <!-- Add more cells for contract_type, start_date, duration_months, bill_frequency as needed -->
+                    <td>
+                        <!-- Delete Form -->
+                        <form method="post" action="{{ url_for('delete_manpower', emp_punch_id=employee.emp_punch_id) }}">
+                            <input type="submit" value="Delete">
+                        </form>
+                        <!-- Update Form -->
+                        <form method="post" action="{{ url_for('update_manpower', emp_punch_id=employee.emp_punch_id) }}">
+
+                            <label for="emp_name">New Name:</label>
+                            <input type="text" id="emp_name" name="emp_name" required><br>
+
+                            <label for="contract_no">New Contract Number:</label>
+                            <input type="text" id="contract_no" name="contract_no" required><br>
+
+                            <input type="submit" value="Update">
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

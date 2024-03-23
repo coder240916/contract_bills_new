@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Contracts{% endblock %}
+
+{% block content %}
+
+    <nav>
+            
+        <ul>
+            <li><a href="{{ url_for('create_bill') }}">Attendance</a></li>
+            <li><a href="{{ url_for('create_bill') }}">Bill Abstract</a></li>
+            <li><a href="{{ url_for('create_bill') }}">Bill Docs</a></li>
+            <li><a href="{{ url_for('create_bill') }}">Contract Docs</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+  
+    <h2>
+        This is Dashboard for EIC users for manpower contracts.
+        {% if no_of_contracts == 0 %}
+        <p> You are not EIC for any manpower contracts.</p>
+        {% endif %}
+    </h2>
+
+{% endblock %}

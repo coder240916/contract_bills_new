@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Add Contract{% endblock %}
+
+{% block content %}
+    <h2>Add Contract</h2>
+    <form method="post">
+        <label for="contract_no">Contract Number:</label>
+        <input type="text" id="contract_no" name="contract_no" required><br>
+        <label for="eic_pbno">EIC PB Number:</label>
+        <input type="number" id="eic_pbno" name="eic_pbno" required><br>
+        <label for="oic_pbno">OIC PB Number:</label>
+        <input type="number" id="oic_pbno" name="oic_pbno" required><br>
+        <label for="contract_type">Contract Type:</label>
+        <input type="text" id="contract_type" name="contract_type" required><br>
+        <input type="text" id="contract_value" name="contract_value" required><br>
+        <input type="submit" value="Add Contract">
+    </form>
+    {% if message %}
+    <h2>message</h2>
+    {% endif %}
+{% endblock %}

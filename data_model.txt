@@ -1,0 +1,25 @@
+Contracts Table
+--------------
+contract_no primary and unique text
+EIC_pbno  Integer
+OIC_pbno Integer
+contract_type  text (manpower or work_package) 
+start_date date
+duration(months) Integer
+bill_frequency Integer 1 or 3 
+
+
+Contract Employees Table
+-------------------------
+emp_punch_id
+emp_name
+contract_no
+esi_no 
+pf_no
+
+users Table
+-----------
+user_id
+username
+password
+
