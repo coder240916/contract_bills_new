@@ -30,6 +30,7 @@ def generate_wage_calc_sheet(month,year,wage_calc_df,bill_pay_days,service_charg
     month_line = f"Month: {month_year}"
 
     pf,edli,esi = bill_pay_days["EMPL_PF"],bill_pay_days["EMPL_EDLI"],bill_pay_days["EMPL_ESI"]
+    service_charges = bill_pay_days["SKILLED"] * service_charges[0] + bill_pay_days["SEMI-SKILLED"] * service_charges[1] +bill_pay_days["UNSKILLED"] * service_charges[2]
     
     workbook = load_workbook(template_path)
     sheet = workbook['Wage_Calculation']  # Update with your sheet's name

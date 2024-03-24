@@ -4,9 +4,11 @@ import calendar
 import pandas as pd
 from datetime import datetime,date
 
+from sqlalchemy import and_
+
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_file
 from sqlalchemy.exc import SQLAlchemyError
-from data_model_flask_alchemy import Contract, User, ContractEmployee, ManpowerWage, db
+from data_model_flask_alchemy import Contract, User, ContractEmployee, ManpowerWage, BillOfQuantities, db
 from werkzeug.security import generate_password_hash, check_password_hash
 from utils.utils import generate_data,generate_abstract,BILLS_FOLDER_PATH,get_prev_months,generate_attendance_data
 from utils.utils import generate_attendance_data_df,split_list,attendance_to_csv,get_month_name
@@ -441,6 +443,15 @@ with app.app_context():
             target_path = create_pf_esi_sheet(month,year,contract_no,pf_epf_sheet)
             print(bill_pay_days)
 
+            result = BillOfQuantities.query.filter( and_( 
+                                                      BillOfQuantities.description.ilike('%service charges%'), 
+                                                      BillOfQuantities.contract_no == contract_no)
+                                                      ).order_by(BillOfQuantities.sl_no).all()
+            
+            service_charges = []
+            for item in result:
+                service_charges.append(float(item.rate))
+            service_charges = sorted(service_charges,reverse=True)
             
             wage_calc_df = wage_calc_preprocessing(bill_pay_days,wages)
             wage_calc_sheet = generate_wage_calc_sheet(month,year,wage_calc_df,bill_pay_days,service_charges,ld,penalty,taxes,other_recovery,contract_no,vendor_name)

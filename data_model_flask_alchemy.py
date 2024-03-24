@@ -32,7 +32,7 @@ class Contract(db.Model):
     bills = db.relationship("ContractBills", back_populates="contract")
     department = db.relationship("Department", back_populates="contract")
     vendor = db.relationship("Vendors", back_populates="contract")
-    boq = db.relationship("bill_of_quantities", back_populates="contract")
+    boq = db.relationship("BillOfQuantities", back_populates="contract")
 
     def __repr__(self):
         return f"<Contract {self.contract_no} {self.eic_pbno} {self.oic_pbno} {self.contract_type} {self.start_date} {self.duration_months} {self.bill_frequency}>"
@@ -116,11 +116,11 @@ class BillOfQuantities(db.Model):
     __tablename__ = "bill_of_quantities"
 
     sl_no = db.Column(db.Integer, primary_key=True)
-    contract_no = db.Column(db.String, db.ForeignKey('contracts.contract_no'))
+    contract_no = db.Column(db.String, db.ForeignKey('contracts.contract_no'),primary_key=True)
     description = db.Column(db.String, nullable=False)
-    qty = db.Column(db.Integer, nullable=True)
+    qty = db.Column(db.Integer, nullable=False)
     unit = db.Column(db.String,nullable=False)
-    rate = db.Column(db.Integer, nullable=True)
+    rate = amount = db.Column(db.Numeric(precision=10,scale=2), nullable=False)
     amount = db.Column(db.Numeric(precision=10,scale=2), nullable=False)
 
     contract = db.relationship("Contract", back_populates="boq")
