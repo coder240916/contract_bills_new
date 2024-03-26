@@ -4,7 +4,7 @@ import calendar
 import pandas as pd
 from datetime import datetime,date
 
-from sqlalchemy import and_
+from sqlalchemy import and_,distinct
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_file
 from sqlalchemy.exc import SQLAlchemyError
@@ -15,7 +15,9 @@ from utils.utils import generate_attendance_data_df,split_list,attendance_to_csv
 from utils.attendance_form import attendance_processing,generate_attendance_excel
 from utils.pf_esi_format import pf_esi_preprocessing,generate_pf_esi_sheet,create_pf_esi_sheet
 from utils.wage_calc import wage_calc_preprocessing,generate_wage_calc_sheet,create_wage_calc_sheet
+from utils.rar_abstract import get_rar_quantities
 from flask_bcrypt import Bcrypt
+from forms.rar_form import FixedForm,create_dynamic_form
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Change this to a secure secret key
@@ -443,6 +445,8 @@ with app.app_context():
             target_path = create_pf_esi_sheet(month,year,contract_no,pf_epf_sheet)
             print(bill_pay_days)
 
+            session["rar_abstract_data"] = bill_pay_days
+
             result = BillOfQuantities.query.filter( and_( 
                                                       BillOfQuantities.description.ilike('%service charges%'), 
                                                       BillOfQuantities.contract_no == contract_no)
@@ -462,42 +466,47 @@ with app.app_context():
 
 
     # create bill for EIC users
-    @app.route("/create_bill",methods=["GET","POST"])
-    def create_bill():
+    @app.route("/create_abstract",methods=["GET","POST"])
+    def create_abstract():
         if 'user_id' in session or "eic_user_id" not in session :
             return redirect(url_for('login'))
         
         contracts = db.session.query(Contract).filter(Contract.eic_pbno == session["eic_user_id"])
+        
+        month_dict = get_prev_months()
+        fixed_form = FixedForm(contracts=contracts,month_dict=month_dict,session_attendance_data=None)
+        # fixed_form.month_select.default = session["attendance_data"].get("selected_month")
+        dynamic_form = None
+        present_rar_qty = None
 
-        if request.method == "POST":
-            contract_no = request.form['contract_no']
-            rar_no = int(request.form['rar_no'])
-            penalty = int(request.form['penalty'])
-            invoice_no = request.form['invoice_no']
-            invoice_date = str(datetime.strptime(request.form["invoice_date"], "%Y-%m-%d").date())
-            invoice_amount = request.form["invoice_amount"]
-            bill_abstract = request.form.get("bill_abstract")
+        if request.method == "POST" and fixed_form.validate(): 
 
-            if bill_abstract:
-                contract_folder_path = os.path.join(app.root_path,BILLS_FOLDER_PATH,f"{contract_no}",f"RAR_{rar_no}")
-                rar_template_path = os.path.join(app.root_path,BILLS_FOLDER_PATH,f"{contract_no}","bill_templates","RAR.xlsx")
+
+            session["rar_abstract_data"] = {"contract_no":fixed_form.contract_no.data,
+                                            "rar_no":fixed_form.rar_no.data,
+                                            "invoice_no":fixed_form.invoice_number.data,
+                                            "invoice_date":fixed_form.invoice_date.data,
+                                            "selected_month":request.form["month_select"]}
+            
+            boq_lines = db.session.query(BillOfQuantities).filter(BillOfQuantities.contract_no == "22SNCJO-373").all()
+            unique_descriptions = [[boq_line.sl_no,boq_line.description] for boq_line in boq_lines]
+            dynamic_form = create_dynamic_form(unique_descriptions)
+            form = dynamic_form(request.form)
+
+            present_rar_qty = get_rar_quantities(session_rar_abstract_data= session["rar_abstract_data"], descriptions=unique_descriptions)
+
+            # print(request.form)
+            # print(form.errors)
+            # print(form.validate())
+
+            if "field_1" in request.form and form.validate():
                 
-
-                os.makedirs(contract_folder_path,exist_ok=True)
-                target_path = os.path.join(app.root_path,BILLS_FOLDER_PATH,f"{contract_no}",f"RAR_{rar_no}","bill_abstract.xlsx")
-                # data = generate_data(rar_template_path,rar_no)
-                # message = generate_abstract(data,rar_template_path,rar_no,penalty,target_path)
-                flash("Bill Abstract generated successfully!","success")
-                bill_data = {"contract_no":contract_no,"rar_no":rar_no,"penalty":penalty,
-                            "invoice_no":invoice_no,"invoice_date":invoice_date,
-                            "invoice_amount":invoice_amount,"abstract_date":str(datetime.now().strftime("%d-%m-%Y %H:%M")),
-                            "bill_abstract":bill_abstract}
-                session["bill_data"] = bill_data
-                return render_template("create_bill.html",contracts=contracts,message="generate_ifs_bill")
-            else:
-                flash("please select the bill abstract checkbox","no-selection")
-                return render_template("create_bill.html",contracts=contracts)
-        return render_template("create_bill.html",contracts=contracts)
+                present_rar_qty = [request.form.get(f"field_{i}") for i in range(1,len(unique_descriptions)+1)]
+                session["rar_abstract_data"]["present_rar_qty"] = present_rar_qty
+                flash(str(session["rar_abstract_data"]),"session")
+                return render_template('rar_page.html', fixed_form=fixed_form, dynamic_form=dynamic_form,present_rar_qty=present_rar_qty)
+            
+        return render_template('rar_page.html', fixed_form=fixed_form, dynamic_form=dynamic_form,present_rar_qty=present_rar_qty)
 
 
     @app.route("/generate_ifs_bill",methods=["POST"])

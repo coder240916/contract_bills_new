@@ -1,5 +1,5 @@
 from data_model_flask_alchemy import Contract, User, ContractEmployee, ManpowerWage, Department, db, BillOfQuantities
-from sqlalchemy import and_
+from sqlalchemy import and_,distinct
 
 from all_flask_alchemy import app
 
@@ -10,18 +10,21 @@ from datetime import datetime
 if __name__ == "__main__":
 
     with app.app_context():
-        result = BillOfQuantities.query.filter( and_( 
-                                                      BillOfQuantities.description.ilike('%service charges%'), 
-                                                      BillOfQuantities.contract_no == contract_no)
-                                                      ).order_by(BillOfQuantities.sl_no).all()
+         #boq_lines = BillOfQuantities.query.filter(BillOfQuantities.contract_no=="22SNSJO-373").order_by(BillOfQuantities.sl_no).all()
+         boq_lines = db.session.query(BillOfQuantities).filter(BillOfQuantities.contract_no == "22SNCJO-373").all()
+         print([[boq_line.sl_no,boq_line.description] for boq_line in boq_lines])
+        # result = BillOfQuantities.query.filter( and_( 
+        #                                               BillOfQuantities.description.ilike('%service charges%'), 
+        #                                               BillOfQuantities.contract_no == contract_no)
+        #                                               ).order_by(BillOfQuantities.sl_no).all()
                                                    
-        # Print the results
-        service_charges = []
-        for item in result:
-            print(item.sl_no,item.description, item.qty, item.unit, item.rate, item.amount)
-            service_charges.append(float(item.rate))
+        # # Print the results
+        # service_charges = []
+        # for item in result:
+        #     print(item.sl_no,item.description, item.qty, item.unit, item.rate, item.amount)
+        #     service_charges.append(float(item.rate))
 
-        print(sorted(service_charges,reverse=True))
+        # print(sorted(service_charges,reverse=True))
 #         department = Department(dept_no=25,dept_name="FNNP-25",dept_phone_no=2874)
 #         db.session.add(department)
 #         db.session.commit()

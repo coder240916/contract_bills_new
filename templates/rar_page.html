@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Manpower{% endblock %}
+
+{% block content %}
+
+    <nav>
+                
+        <ul>
+            <li><a href="{{ url_for('manpower') }}">Manpower</a></li>
+            <li><a href="{{ url_for('attendance') }}">Attendance</a></li>
+            <li><a href="{{ url_for('create_abstract') }}">Bill Abstract</a></li>
+            <li><a href="{{ url_for('attendance') }}">Bill Docs</a></li>
+            <li><a href="{{ url_for('attendance') }}">Contract Docs</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+
+    <h1>RAR Bill Abstract Form</h1>
+    <form class="styled-form" method="POST" action="/create_abstract">
+        {{ fixed_form.hidden_tag() }}
+        <div class="form-row">
+            {{ fixed_form.contract_no.label }}
+            {{ fixed_form.contract_no }}
+            {% for error in fixed_form.contract_no.errors %}
+                <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="form-row">
+            {{ fixed_form.invoice_number.label }}
+            {{ fixed_form.invoice_number }}
+            {% for error in fixed_form.invoice_number.errors %}
+                <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="form-row">
+            {{ fixed_form.invoice_date.label }}
+            {{ fixed_form.invoice_date }}
+            {% for error in fixed_form.invoice_date.errors %}
+                <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="form-row">
+            {{ fixed_form.rar_no.label }}
+            {{ fixed_form.rar_no }}
+            {% for error in fixed_form.rar_no.errors %}
+                <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-row">
+            {{ fixed_form.month_select.label }}
+            {{ fixed_form.month_select }}
+            {% for error in fixed_form.month_select.errors %}
+                <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        
+      
+        {% if dynamic_form %}
+             <h2>Enter Present RAR Bill Quantities:</h2>
+
+             {% for sl_no, description in dynamic_form.unique_descriptions %}
+                <div class="form-row">
+                    SL No: {{ sl_no }} - Description: {{ description }}
+                    <input type="text" name="field_{{ sl_no }}" value="{{ present_rar_qty[sl_no - 1] if present_rar_qty else 0 }}">
+                    <!-- You can add validation errors if needed -->
+                </div>
+            {% endfor %}
+        {% endif %}
+        <button type="submit">Submit</button>
+
+    </form>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    
+{% endblock %}
