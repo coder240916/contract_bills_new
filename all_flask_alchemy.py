@@ -445,7 +445,7 @@ with app.app_context():
             target_path = create_pf_esi_sheet(month,year,contract_no,pf_epf_sheet)
             print(bill_pay_days)
 
-            session["rar_abstract_data"] = bill_pay_days
+            #session["rar_abstract_data"] = bill_pay_days
 
             result = BillOfQuantities.query.filter( and_( 
                                                       BillOfQuantities.description.ilike('%service charges%'), 
@@ -460,6 +460,7 @@ with app.app_context():
             wage_calc_df = wage_calc_preprocessing(bill_pay_days,wages)
             wage_calc_sheet = generate_wage_calc_sheet(month,year,wage_calc_df,bill_pay_days,service_charges,ld,penalty,taxes,other_recovery,contract_no,vendor_name)
             target_path = create_wage_calc_sheet(month,year,contract_no,wage_calc_sheet)
+            print(target_path)
 
             # return redirect(url_for('attendance',download=True))
             return send_file(target_path,as_attachment=True)

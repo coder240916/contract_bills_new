@@ -62,7 +62,7 @@ def attendance_processing(month, year, contract_no, emp_categories):
     result_df = result_days.join(result_total).reset_index().rename(columns={'index': "Emp Name"})
 
     # create NH DAY and SL.No columns and reindex the columns
-    result_df["NH DAY"] = 0
+    result_df["NH DAY"] = 1.0
     result_df["CATEGORY"] = emp_categories
     result_df = pd.concat([result_df.iloc[:, -1:], result_df.iloc[:, :-1]], axis=1)
     result_df = result_df.sort_values(by="CATEGORY",key=lambda x:x.map(custom_sort))

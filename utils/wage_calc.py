@@ -9,12 +9,14 @@ from openpyxl.utils import get_column_letter
 BILLS_FOLDER_PATH = os.path.join("bill docs")
 
 def wage_calc_preprocessing(bill_pay_days,wages):
-    wages["Days Present"] = [bill_pay_days["SKILLED"],bill_pay_days["SEMI-SKILLED"],bill_pay_days["UNSKILLED"]]
+    wages["Days Present"] = [bill_pay_days["SKILLED"][0],bill_pay_days["SEMI-SKILLED"][0],bill_pay_days["UNSKILLED"][0]]
+    wages["Days NH"] = [bill_pay_days["SKILLED"][1],bill_pay_days["SEMI-SKILLED"][1],bill_pay_days["UNSKILLED"][1]]
     wages = wages.reindex(wages.index[::-1]).reset_index(drop=True)
     wages["SL NO"] = [int(val)+1  for val in wages.index]
     wages = pd.concat([wages.iloc[:,-1:],wages.iloc[:,:-1]],axis=1)
     wages["mandays_pf"] = wages["Days Present"]
     wages["total_gross_amount"] = wages["Wage per day"] * wages["Days Present"]
+    wages["total_nh_amount"] = wages["Wage per day"] * wages["Days NH"] 
     return wages
 
 
@@ -30,7 +32,8 @@ def generate_wage_calc_sheet(month,year,wage_calc_df,bill_pay_days,service_charg
     month_line = f"Month: {month_year}"
 
     pf,edli,esi = bill_pay_days["EMPL_PF"],bill_pay_days["EMPL_EDLI"],bill_pay_days["EMPL_ESI"]
-    service_charges = bill_pay_days["SKILLED"] * service_charges[0] + bill_pay_days["SEMI-SKILLED"] * service_charges[1] +bill_pay_days["UNSKILLED"] * service_charges[2]
+    nh_total = wage_calc_df["total_nh_amount"].sum()
+    service_charges = bill_pay_days["SKILLED"][0] * service_charges[0] + bill_pay_days["SEMI-SKILLED"][0] * service_charges[1] +bill_pay_days["UNSKILLED"][0] * service_charges[2]
     
     workbook = load_workbook(template_path)
     sheet = workbook['Wage_Calculation']  # Update with your sheet's name
@@ -48,7 +51,7 @@ def generate_wage_calc_sheet(month,year,wage_calc_df,bill_pay_days,service_charg
     start_row = 8
     start_column = 3
 
-    for index, row in wage_calc_df.iloc[:,2:].iterrows():
+    for index, row in wage_calc_df[["Wage per day","Days Present","mandays_pf","total_gross_amount"]].iterrows():
         for col_num, value in enumerate(row, start=start_column): 
 
             cell = sheet.cell(row=start_row + index, column=col_num)
@@ -57,7 +60,7 @@ def generate_wage_calc_sheet(month,year,wage_calc_df,bill_pay_days,service_charg
     start_row = 13
     start_column = 3
 
-    for index, row in wage_calc_df[["Wage per day"]].iterrows():
+    for index, row in wage_calc_df[["Wage per day","Days NH","Days NH","total_nh_amount"]].iterrows():
         for col_num, value in enumerate(row, start=start_column): 
 
             cell = sheet.cell(row=start_row + index, column=col_num)
@@ -75,7 +78,7 @@ def generate_wage_calc_sheet(month,year,wage_calc_df,bill_pay_days,service_charg
     cell = sheet.cell(row=20,column=6)
     cell.value = service_charges
     
-    sub_total = (wage_calc_df.sum()["total_gross_amount"] + pf + esi + edli + service_charges) 
+    sub_total = (wage_calc_df.sum()["total_gross_amount"] + pf + esi + edli + service_charges + nh_total) 
     gst = sub_total * 0.18
     final_total = sub_total + gst
     

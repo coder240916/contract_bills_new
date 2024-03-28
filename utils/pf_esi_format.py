@@ -46,14 +46,14 @@ def pf_esi_preprocessing(attendance_path,wages:pd.DataFrame,prof_tax):
 
         group = groups.get_group(category)
         processed_group = group_processing(group,category,prof_tax)
-        bill_pay_days[category] = processed_group.loc["total","TOTAL PAY DAYS"]
+        bill_pay_days[category] = processed_group.loc["total",["TOTAL PAY DAYS","NH DAY"]].values.tolist()
         processed_df = pd.concat([processed_df,processed_group],axis=0)
 
 
     final_row = processed_df.loc["total"].sum(axis=0).values
     final_row[:2] = ["","TOTAL"]
     processed_df.loc["final_total"] = final_row
-    processed_df.loc[["final_total","total"],"Wage per day"] = ""
+    processed_df.loc[["final_total","total"],["Wage per day","nh_wage"]] = ""
 
     processed_df["SL NO"] = [int(val)+1 if val not in ["total","final_total"] else "" for val in processed_df.index]
     processed_df = pd.concat([processed_df.iloc[:,-1:],processed_df.iloc[:,:-1]],axis=1)
@@ -64,7 +64,7 @@ def pf_esi_preprocessing(attendance_path,wages:pd.DataFrame,prof_tax):
     bill_pay_days["EMPL_ESI"] = esi_total
     for category in ["SKILLED","SEMI-SKILLED","UNSKILLED"]:
         if category not in bill_pay_days.keys():
-            bill_pay_days.update({category:0})
+            bill_pay_days.update({category:[0.0,0.0]})
 
     processed_df.reset_index(drop=True,inplace=True)
     processed_df.drop(["CATEGORY OF SKILLNESS"],axis=1,inplace=True)
