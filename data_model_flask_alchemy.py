@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, CheckConstraint, DateTime, Numeric
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, CheckConstraint, DateTime, Numeric,Float
 from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
 
@@ -33,6 +33,7 @@ class Contract(db.Model):
     department = db.relationship("Department", back_populates="contract")
     vendor = db.relationship("Vendors", back_populates="contract")
     boq = db.relationship("BillOfQuantities", back_populates="contract")
+    bills_boq_lines = db.relationship("BillsBoqLines", back_populates="contract")
 
     def __repr__(self):
         return f"<Contract {self.contract_no} {self.eic_pbno} {self.oic_pbno} {self.contract_type} {self.start_date} {self.duration_months} {self.bill_frequency}>"
@@ -59,26 +60,6 @@ class User(db.Model):
     username = db.Column(db.String, unique=True)
     password_hash = db.Column(db.String)
     
-
-class ContractBills(db.Model):
-    __tablename__ = 'bills'
-
-    ge_no = db.Column(db.Integer, primary_key=True)
-    contract_no = db.Column(db.String, db.ForeignKey('contracts.contract_no'))
-    rar_no = db.Column(db.Integer)
-    invoice_no = db.Column(db.String, unique=True)
-    invoice_date = db.Column(db.Date)
-    invoice_amount = db.Column(db.Integer)
-    ge_date = db.Column(db.Date)
-    rr_no = db.Column(db.String, unique=True)
-    penalty = db.Column(db.Integer)
-    abstract_timestamp = db.Column(db.DateTime, default=db.func.now())
-
-    contract = db.relationship("Contract", back_populates="bills")
-
-    def __repr__(self):
-        return f"<Bill(rar_no={self.rar_no}, contract_no = {self.contract_no}, invoice_no={self.invoice_no}), ge_no = {self.ge_no} , rr_no={self.rr_no} >"
-
 
 class ManpowerWage(db.Model):
     __tablename__ = "labour_wages"
@@ -124,6 +105,39 @@ class BillOfQuantities(db.Model):
     amount = db.Column(db.Numeric(precision=10,scale=2), nullable=False)
 
     contract = db.relationship("Contract", back_populates="boq")
+    bills_boq_lines = db.relationship("BillsBoqLines",back_populates="boq")
 
 
+class ContractBills(db.Model):
+    __tablename__ = 'bills'
+
+    ge_no = db.Column(db.Integer, primary_key=True)
+    contract_no = db.Column(db.String, db.ForeignKey('contracts.contract_no'))
+    rar_no = db.Column(db.Integer)
+    invoice_no = db.Column(db.String, unique=True)
+    invoice_date = db.Column(db.Date)
+    invoice_amount = db.Column(db.Integer)
+    ge_date = db.Column(db.Date)
+    rr_no = db.Column(db.String, unique=True)
+    penalty = db.Column(db.Integer)
+    from_date = db.Column(db.Date)
+    to_date = db.Column(db.Date)
+    abstract_timestamp = db.Column(db.DateTime, default=db.func.now())
+
+    contract = db.relationship("Contract", back_populates="bills")
+
+    def __repr__(self):
+        return f"<Bill(rar_no={self.rar_no}, contract_no = {self.contract_no}, invoice_no={self.invoice_no}), ge_no = {self.ge_no} , rr_no={self.rr_no} >"
+
+
+class BillsBoqLines(db.Model):
+    __table_name__ = "bills_boq_lines"
+
+    contract_no = db.Column(db.String, db.ForeignKey('contracts.contract_no'),primary_key=True)
+    boq_line_no = db.Column(db.Integer, db.ForeignKey('bill_of_quantities.sl_no'),primary_key=True)
+    rar_no = db.Column(db.Integer,primary_key=True)
+    qty = db.Column(db.Float,nullable=False)
+
+    contract = db.relationship("Contract", back_populates="bills_boq_lines")
+    boq = db.relationship("BillOfQuantities", back_populates="bills_boq_lines")
 

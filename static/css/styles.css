@@ -96,6 +96,7 @@ td form {
 
 /* Headings */
 h1,h2, h3 {
+    width: 500%;
     background-color: #f2f2f2; /* Background color for headings */
     /*border-bottom: 2px solid black; /* Border at the bottom of headings */
     padding: 5px 0; /* Padding for spacing */
@@ -127,7 +128,9 @@ h1,h2, h3 {
 }
 
 #attendance-form button,
-#generate-attendance-form button {
+#generate-attendance-form button,
+#bill-docs-form button,
+#checklist-form button {
     display: block; 
     background-color: blue;
     color: white;
@@ -149,7 +152,9 @@ h1,h2, h3 {
 
 #attendance-form button:hover,
 #save-attendance-form button:hover,
-#generate-attendance-form button:hover  {
+#generate-attendance-form button:hover ,
+#bill-docs-form button:hover,
+#checklist-form button:hover {
     background-color: rgb(75, 240, 9);
 }
 
@@ -182,4 +187,31 @@ input[type="submit"] {
     margin-left: auto; /* Push the submit button to the right */
     height: 100%; /* Make the button fill the entire height of the row */
     margin: 5px; /* Adjust margin as needed */
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Two columns */
+    grid-gap: 10px; /* Gap between grid items */
+    margin-bottom: 20px; /* Margin below each grid row */
+}
+
+.form-item {
+    display: flex;
+    align-items: center;
+}
+
+.form-item label {
+    width: 500px; /* Width of labels */
+    margin-right: 10px; /* Spacing between label and input */
+}
+
+.form-item input {
+    flex: 1; /* Take up remaining space */
+}
+
+.bold-label {
+    font-weight: bold;
+    font-family: serif;
+    font-size: 25px;
 }

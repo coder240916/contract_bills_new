@@ -16,8 +16,10 @@ from utils.attendance_form import attendance_processing,generate_attendance_exce
 from utils.pf_esi_format import pf_esi_preprocessing,generate_pf_esi_sheet,create_pf_esi_sheet
 from utils.wage_calc import wage_calc_preprocessing,generate_wage_calc_sheet,create_wage_calc_sheet
 from utils.rar_abstract import get_rar_quantities
+from utils.bill_docs import get_latest_excel_file, get_from_and_to_dates, get_checklist_form_data, get_undertaking_form_data, generate_checklist_sheet
 from flask_bcrypt import Bcrypt
 from forms.rar_form import FixedForm,create_dynamic_form
+from forms.bill_docs_form import BillDocsForm
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Change this to a secure secret key
@@ -505,9 +507,76 @@ with app.app_context():
                 present_rar_qty = [request.form.get(f"field_{i}") for i in range(1,len(unique_descriptions)+1)]
                 session["rar_abstract_data"]["present_rar_qty"] = present_rar_qty
                 flash(str(session["rar_abstract_data"]),"session")
+
+                
                 return render_template('rar_page.html', fixed_form=fixed_form, dynamic_form=dynamic_form,present_rar_qty=present_rar_qty)
             
         return render_template('rar_page.html', fixed_form=fixed_form, dynamic_form=dynamic_form,present_rar_qty=present_rar_qty)
+
+
+    @app.route("/bill_docs",methods=["GET","POST"])
+    def bill_docs():
+        if 'user_id' in session or "eic_user_id" not in session :
+            return redirect(url_for('login'))
+        
+        contracts = db.session.query(Contract).filter(Contract.eic_pbno == session["eic_user_id"])
+
+        contract_no = [contract.contract_no for contract in contracts][0]
+        
+        month_dict = get_prev_months()
+
+        latest_excel_file = get_latest_excel_file(contract_no).split("_")
+
+        month_year = "-".join(latest_excel_file[-2:]).split(".")[0]
+
+        fixed_form = BillDocsForm(contracts=contracts,month_dict=month_dict,default_month=month_year)
+
+        checklist_form_data = None
+
+        undertaking_form_data = None
+
+        if request.method == "POST" and fixed_form.validate(): 
+
+            contract_no = request.form["contract_no"] 
+
+            contract = db.session.query(Contract).filter(Contract.contract_no == contract_no).first()
+            
+            selected_month = request.form["month_select"]
+            bill_from_date,bill_to_date = get_from_and_to_dates(contract_no,selected_month)
+
+            checklist_form_data = get_checklist_form_data(contract)
+
+            
+
+            if "checklist_field_1" in request.form and fixed_form.validate():
+
+                session["checklist_data"] = {"contract_no":fixed_form.contract_no.data,
+                                            "ge_number":fixed_form.ge_number.data,
+                                            "ge_date":fixed_form.ge_date.data.strftime("%d-%m-%Y"),
+                                            "rr_no":fixed_form.rr_no.data,
+                                            "rar_no":fixed_form.rar_no.data,
+                                            "selected_month":request.form["month_select"]}
+                
+                print(request.form)
+
+                user_entered_values = [request.form[f"checklist_field_{i}"].replace(r"\s+"," ") for i in range(1,39)]
+
+                generate_checklist_sheet(checklist_data = session["checklist_data"],contract=contract,values=user_entered_values)
+
+                flash("Checklist generated successfully","success")
+
+                undertaking_form_data = get_undertaking_form_data()
+                checklist_form_data = None
+
+            if "undertaking_field_1" in request.form and fixed_form.validate():
+                flash("Undertaking sheet generated successfully","success")
+                flash("Please wait,the files are being downloaded..","success")
+                checklist_form_data = None
+                undertaking_form_data = None
+                return render_template('bill_docs_form.html', fixed_form=fixed_form,checklist_form_data=None,undertaking_form_data=None)
+
+        return render_template('bill_docs_form.html', fixed_form=fixed_form, checklist_form_data=checklist_form_data,undertaking_form_data=undertaking_form_data)
+
 
 
     @app.route("/generate_ifs_bill",methods=["POST"])
