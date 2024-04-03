@@ -215,3 +215,77 @@ input[type="submit"] {
     font-family: serif;
     font-size: 25px;
 }
+
+
+/* Style for login container */
+.login-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.login-form label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.login-form input[type="text"],
+.login-form input[type="password"] {
+    width: calc(100% - 22px); /* Adjust width to fit within container with padding */
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box; /* Include padding and border in element's total width */
+}
+
+.login-form input[type="submit"] {
+    width: 97%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-sizing: border-box; /* Include padding and border in element's total width */
+}
+
+.login-form input[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+/* Style for flashed messages */
+.login-container ul {
+    list-style: none;
+    padding: 0;
+}
+
+.login-container ul li {
+    margin-bottom: 10px;
+}
+
+.login-container .error {
+    color: #dc3545;
+}
+
+.login-container .success {
+    color: #28a745;
+}
+
+/* Adjust h2 background */
+.login-container h2 {
+    background-color: #454745;
+    color: #fff;
+    width: 93%;
+    padding: 10px; /* Adjust padding to contain the background color */
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    margin-top: 0; /* Remove default margin */
+    text-align: center;
+}

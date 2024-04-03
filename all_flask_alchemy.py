@@ -61,7 +61,7 @@ with app.app_context():
                     return redirect(url_for('view_contracts'))
                 else:
                     flash("Invalid username or password.", "error")
-                    return render_template('login.html')
+                    return render_template('login_test.html')
             
             # For non-admin users, check both users and contracts table
             else:
@@ -85,7 +85,7 @@ with app.app_context():
                 else:
                     flash("Invalid username or password.", "error")
                     return render_template('login.html')
-        return render_template('login.html')
+        return render_template('login_test.html')
 
     # Logout route
     @app.route('/logout')
