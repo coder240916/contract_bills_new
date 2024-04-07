@@ -101,7 +101,7 @@ class BillOfQuantities(db.Model):
     description = db.Column(db.String, nullable=False)
     qty = db.Column(db.Integer, nullable=False)
     unit = db.Column(db.String,nullable=False)
-    rate = amount = db.Column(db.Numeric(precision=10,scale=2), nullable=False)
+    rate =  db.Column(db.Numeric(precision=10,scale=2), nullable=False)
     amount = db.Column(db.Numeric(precision=10,scale=2), nullable=False)
 
     contract = db.relationship("Contract", back_populates="boq")
@@ -111,18 +111,20 @@ class BillOfQuantities(db.Model):
 class ContractBills(db.Model):
     __tablename__ = 'bills'
 
-    ge_no = db.Column(db.Integer, primary_key=True)
-    contract_no = db.Column(db.String, db.ForeignKey('contracts.contract_no'))
-    rar_no = db.Column(db.Integer)
+    ge_no = db.Column(db.Integer, unique=True)
+    contract_no = db.Column(db.String, db.ForeignKey('contracts.contract_no'),primary_key=True)
+    rar_no = db.Column(db.Integer,primary_key=True)
     invoice_no = db.Column(db.String, unique=True)
     invoice_date = db.Column(db.Date)
-    invoice_amount = db.Column(db.Integer)
+    invoice_amount = db.Column(db.Numeric(precision=10,scale=2), nullable=False)
     ge_date = db.Column(db.Date)
     rr_no = db.Column(db.String, unique=True)
-    penalty = db.Column(db.Integer)
+    penalty = db.Column(db.Float)
     from_date = db.Column(db.Date)
     to_date = db.Column(db.Date)
-    abstract_timestamp = db.Column(db.DateTime, default=db.func.now())
+    bill_timestamp = db.Column(db.DateTime, default=db.func.now())
+    bill_payment_date = db.Column(db.Date,nullable=True)
+
 
     contract = db.relationship("Contract", back_populates="bills")
 

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Contract Bills{% endblock %}
+
+{% block content %}
+
+    <nav>
+                    
+        <ul>
+            <li><a href="{{ url_for('manpower') }}">Manpower</a></li>
+            <li><a href="{{ url_for('attendance') }}">Attendance</a></li>
+            <li><a href="{{ url_for('create_abstract') }}">Bill Abstract</a></li>
+            <li><a href="{{ url_for('bill_docs') }}">Bill Docs</a></li>
+            <li><a href="{{ url_for('contract_docs') }}">Contract Docs</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+
+    <h1>Contract Bills/ Documents </h1>
+
+    <form class="styled-form" id="attendance-form" action="{{ url_for('contract_docs') }}" method="post">
+        <div class="form-row">
+            <label for="contract_select">Select Contract:</label>
+            <select id="contract_select" name="contract_select">
+                {% for contract in contracts %}
+                    <option value="{{ contract.contract_no }}">{{ contract.contract_no }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button id="submit_btn" type="submit">Submit</button>
+    </form>
+    <br><br>
+
+
+
+    {% if contract_bills %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul>
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        <h1>Contract Bills</h1>
+        <table border="1">
+            <thead>
+                <tr>
+                    
+                    <th>Contract No</th>
+                    <th>RAR No</th>
+                    <th>GE No</th>
+                    <th>GE Date</th>
+                    <th>RR No</th>
+                    <th>Invoice No</th>
+                    <th>Invoice Amount</th>
+                    <th>Invoice Date</th>
+                    <th>Penalty(Rs.)</th>
+                    
+                    <th>Bill Payment Date</th>
+                    <th>Download Docs PDF</th>
+                    
+                    <th>Update Bill Payment Date</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for bill in contract_bills %}
+                <tr>
+                    
+                    <td>{{ bill.contract_no }}</td>
+                    
+                    <td>{{ bill.rar_no }}</td>
+                    <td>{{ bill.ge_no }}</td>
+                    <td>{{ bill.ge_date }}</td>
+                    <td>{{ bill.rr_no }}</td>
+                    <td>{{ bill.invoice_no }}</td>
+
+                    <td>{{ bill.invoice_amount }}</td>
+                    <td>{{ bill.invoice_date }}</td>
+                    <td>{{ bill.penalty }}</td>
+                    <td>{% if bill.bill_payment_date == none %} {{ "" }} {% else %} {{ bill.bill_payment_date }} {% endif %}</td>
+                    <td>
+                        <a href="/download_pdf?rar_no={{ bill.rar_no }}">Download PDF</a>
+                    </td>
+                    <td>
+                        <form action="{{ url_for('update_payment_date',contract_no=bill.contract_no, rar_no=bill.rar_no) }}"  method="POST">
+                            <input type="date" name="new_bill_payment_date" required>
+                            <button type="submit">Update</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}

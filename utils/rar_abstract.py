@@ -1,6 +1,9 @@
 import pandas as pd
 import os
 
+from data_model_flask_alchemy import db
+from sqlalchemy.exc import SQLAlchemyError
+
 from copy import copy
 from openpyxl import load_workbook
 from openpyxl.styles import Border,Side,Alignment,Font,PatternFill
@@ -30,6 +33,7 @@ def get_rar_quantities(session_rar_abstract_data,descriptions):
 
 
     return present_rar_qty
+
 
 
 

@@ -1,7 +1,7 @@
 from data_model_flask_alchemy import Contract, User, ContractEmployee, ManpowerWage, Department, db, BillOfQuantities
 from sqlalchemy import and_,distinct
 
-from all_flask_alchemy import app
+from app import app
 
 import csv
 from datetime import datetime
