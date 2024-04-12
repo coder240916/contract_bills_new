@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Editable DataFrame with Hover Info</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <style>
+        .hover-info {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            border: 1px solid #aaa;
+            padding: 10px;
+            z-index: 1;
+        }
+        .editable-cell input[type="text"] {
+            width: 2em; /* Adjust width as needed */
+        }
+
+      
+    </style>
+</head>
+<body>
+    <div class="container"  style="margin-left: 0;">
+        <h2>Editable DataFrame with Hover Info</h2>
+        <form method="POST" action="/punching_data">
+            <table id="editable" class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        {% for col in punch_df.columns.values %}
+                            <th>{{ col|escape }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for index, row in punch_df.iterrows() %}
+                        <tr>
+                            {% for col, value in row.items() %}
+                                <td class="{% if loop.index0 == 0 or loop.index == loop.length %}non-editable{% else %}editable-cell{% endif %}">
+                                    {% if loop.index0 == 0 or loop.index == loop.length %}
+                                        {{ value }}
+                                    {% else %}
+                                        <input type="text" name="cell_{{ index }}_{{ loop.index0 }}" value="{{ value }}">
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var hoverData = {{ hover_data|safe }};
+            var cells = document.querySelectorAll('table#editable td.editable-cell');
+            
+            cells.forEach(function (cell, index) {
+                cell.addEventListener('click', function () {
+                    var rowIndex = this.parentElement.rowIndex - 1; // Adjusting for header row
+                    var colIndex = this.cellIndex - 1;
+                    var cellData = hoverData[rowIndex];
+                    var info = cellData[colIndex];
+
+                    console.log(rowIndex,colIndex,cellData,info);
+
+                    var existingHoverInfo = document.getElementById('hoverInfo_' + index);
+                    if (!existingHoverInfo) {
+                        var hoverInfo = document.createElement('div');
+                        hoverInfo.className = 'hover-info';
+                        hoverInfo.id = 'hoverInfo_' + index;
+                        hoverInfo.innerHTML = info;
+                        document.body.appendChild(hoverInfo);
+
+                        var cellPos = this.getBoundingClientRect();
+                        hoverInfo.style.top = cellPos.top + window.scrollY + cellPos.height + 'px';
+                        hoverInfo.style.left = cellPos.left + window.scrollX + 'px';
+                    } else {
+                        existingHoverInfo.innerHTML = info;
+                        existingHoverInfo.style.display = 'block';
+                    }
+                });
+
+                cell.addEventListener('mouseleave', function () {
+                    var hoverInfo = document.getElementById('hoverInfo_' + index);
+                    if (hoverInfo) {
+                        hoverInfo.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

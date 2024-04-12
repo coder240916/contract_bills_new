@@ -6,6 +6,7 @@ from datetime import datetime,date
 
 from sqlalchemy import and_,distinct
 from utils.app_db_operations import insert_or_update_bills_boq_lines, insert_or_update_contract_bill
+from utils.punch_processing import process_punch_df
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_file
 from sqlalchemy.exc import SQLAlchemyError
@@ -323,6 +324,32 @@ with app.app_context():
             db.session.commit()
         return redirect(url_for('manpower'))
 
+
+    # attendance endpoint
+    @app.route("/punching_data",methods=["GET","POST"])
+    def punching_data():
+        if 'user_id' in session or "eic_user_id" not in session :
+            return redirect(url_for('login'))
+        
+        punch_df,hover_df = process_punch_df("utils/punch_data.xlsx",3,2024)
+        punch_df.reset_index(inplace=True)
+        print(str(punch_df))
+        
+        if request.method == 'POST':
+        # Update DataFrame with edited values
+            #print(request.form)
+            for key in request.form:
+                # print(key)
+                row,col = key.split('_')[1:]
+                punch_df.iloc[int(row), int(col)] = request.form[key]
+            # Save or process the updated DataFrame here
+        hover_data = [[[str(x) for x in dt] if dt != "No Punch" else "No Punch" for dt in sublist ] for sublist in hover_df.values.tolist() ]
+        # Convert DataFrame to HTML table with editable cells
+        # html_table = attendance_df.to_html(classes='table table-bordered table-hover', index=True, escape=False,
+        #                         header="true", table_id="editable")
+        return render_template('punching.html', punch_df=punch_df, hover_data=hover_data)
+
+
     # attendance endpoint
     @app.route("/attendance",methods=["GET","POST"])
     def attendance():
@@ -369,6 +396,7 @@ with app.app_context():
 
 
             attendance_data = generate_attendance_data_df(employee_names,int(month),int(year),contract_no)
+            print(attendance_data)
 
             return render_template("attendance_form.html",
                                    attendance_data=attendance_data,
