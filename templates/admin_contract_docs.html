@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Contracts{% endblock %}
+
+{% block content %}
+    <nav>
+        <ul>
+            
+            <li><a href="{{ url_for('view_contracts') }}">Contracts</a></li>
+            <li><a href="{{ url_for('view_users') }}">Users</a></li>
+            <li><a href="{{ url_for('view_wages') }}">Wages</a></li>
+            <li><a href="{{ url_for('admin_contract_docs') }}">Contract Docs</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            
+        </ul>
+    </nav>
+ 
+    {% for contract in contracts %}
+    <div class="contract">
+        <div class="contract-info">
+            <div class="contract-no">
+                <strong>Contract No:</strong> {{ contract.contract_no }}
+            </div>
+            <br>
+            <div class="description">
+                <strong>Description:</strong> {{ contract.contract_description }}
+            </div>
+        </div>
+    
+        <button onclick="toggleExpandContent()" class="expand-button">Show More</button>
+    
+        <div class="expand-content" style="display:none;">
+            <div class="contract-info-1">
+                <strong>EIC PB NO:</strong> {{ contract.eic_pbno }}
+            </div>
+            <div class="contract-info-1">
+                <strong>Contract Type:</strong> {{ contract.contract_type }}
+            </div>
+            <div class="contract-info-1">
+                <strong>Start Date:</strong> {{ contract.start_date }}
+            </div>
+            <div class="contract-info-1">
+                <strong>Vendor Name:</strong> {{ contract.vendor_name }}
+            </div>
+    
+            <div class="contract-docs">
+                <div class="heading">
+                    <strong>Contract Documents:</strong>
+                </div>
+                {% for file_path in contract_files[contract.contract_no] %}
+                <div class="links-info">
+                    {% if file_path %}
+                    <a class="file-link" href="{{ url_for('download', path=file_path) }}">
+                        {{ file_path.split('\\')[-1].split(".")[0] }}
+                    </a>
+                    {% else %}
+                    <span class="empty-cell">&mdash;</span> <!-- Represents an empty cell -->
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+    
+            <div class="payment-status">
+                <strong>Payment Status by Month:</strong>
+                <!-- Insert HTML representation of DataFrame here -->
+                {{ payment_table_html | safe }}
+            </div>
+        </div>
+    </div>
+    
+
+    {% endfor %}
+
+    <script>
+        function toggleExpandContent() {
+            var content = document.querySelector(".expand-content");
+            if (content.style.display === "none") {
+                content.style.display = "block";
+                document.querySelector(".expand-button").textContent = "Show Less";
+            } else {
+                content.style.display = "none";
+                document.querySelector(".expand-button").textContent = "Show More";
+            }
+        }
+    </script>
+{% endblock %}

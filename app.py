@@ -23,6 +23,8 @@ from flask_bcrypt import Bcrypt
 from forms.rar_form import FixedForm,create_dynamic_form
 from forms.bill_docs_form import BillDocsForm
 
+from utils.admin_contract_docs import get_contract_docs_data, generate_download_links,generate_sample_df
+
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Change this to a secure secret key
 app.static_folder = 'static'
@@ -333,17 +335,24 @@ with app.app_context():
         
         punch_df,hover_df = process_punch_df("utils/punch_data.xlsx",3,2024)
         punch_df.reset_index(inplace=True)
-        print(str(punch_df))
+        # print(str(punch_df))
         
         if request.method == 'POST':
         # Update DataFrame with edited values
-            #print(request.form)
+            print(request.form)
             for key in request.form:
                 # print(key)
-                row,col = key.split('_')[1:]
-                punch_df.iloc[int(row), int(col)] = request.form[key]
+                if 'cell' in key:
+                    row,col = key.split('_')[1:]
+                    punch_df.iloc[int(row), int(col)] = request.form[key]
             # Save or process the updated DataFrame here
         hover_data = [[[str(x) for x in dt] if dt != "No Punch" else "No Punch" for dt in sublist ] for sublist in hover_df.values.tolist() ]
+
+        if 'final_submission' in request.form:
+            print(request.form)
+            # Save the updated DataFrame to a CSV file
+            #punch_df.to_csv('updated_punch_data.csv', index=False)  # Change the file pa
+            punch_df.to_csv('utils/updated_punch_data.csv', index=False) 
         # Convert DataFrame to HTML table with editable cells
         # html_table = attendance_df.to_html(classes='table table-bordered table-hover', index=True, escape=False,
         #                         header="true", table_id="editable")
@@ -752,6 +761,40 @@ with app.app_context():
         return redirect(url_for('view_wages'))
 
 
+    @app.route("/admin_contract_docs",methods=["GET","POST"])
+    def admin_contract_docs():
+        if 'user_id' not in session:
+            return redirect(url_for('login'))
+        
+        #contract_files = get_contract_docs_data()
+        contracts = db.session.query(Contract).all()
+        contract_files = {contract.contract_no: generate_download_links(contract.contract_no) for contract in contracts}
+        payment_df = generate_sample_df()
+        
+        status_map = {'Green': '<div class="status-circle green"></div>',
+              'Yellow': '<div class="status-circle yellow"></div>',
+              'Red': '<div class="status-circle red"></div>'}
+
+        payment_df['Status'] = payment_df['Status'].map(status_map)
+        payment_df = payment_df.set_index("Month").T
+
+        print(contract_files)       
+        #payment_table_html = payment_df.to_html(classes='payment-table', index=True, escape=False)
+        payment_table_html=None
+
+        return render_template('admin_contract_docs_1.html',contracts=contracts, contract_files=contract_files,payment_table_html=payment_table_html)
+    
+
+    @app.route('/download')
+    def download():
+        if 'user_id' not in session:
+            return redirect(url_for('login'))
+        
+        path = request.args.get('path')
+        if path:
+            return send_file(path, as_attachment=True)
+        else:
+            return "File not found", 404
 if __name__ == "__main__":
     app.run(debug=False)
 

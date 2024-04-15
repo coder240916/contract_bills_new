@@ -86,6 +86,7 @@ th, td {
 th {
     background-color: #f2f2f2;
     text-align: left;
+    
 }
 
 /* Form inside table */
@@ -288,4 +289,205 @@ input[type="submit"] {
     border-top-right-radius: 5px;
     margin-top: 0; /* Remove default margin */
     text-align: center;
+}
+
+
+.contract {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 20px;
+    position: relative; /* Needed for absolute positioning */
+}
+
+.contract-info {
+    margin-bottom: 10px;
+    justify-content: space-between;
+    font-size: 25px; /* Increase font size as needed */
+
+}
+
+.contract-info .contract-no {
+    flex-basis: 50%;
+    color: rgb(8, 170, 245); /* Change the color of the contract number */
+    font-size: 30px;
+}
+
+
+
+.contract-info div {
+    flex-basis: 50%;
+}
+
+.contract-info strong {
+    font-weight: bold;
+
+}
+
+.contract-links a {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.expand-content {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    font-family: Arial, sans-serif; /* Change the font family as needed */
+    font-size: 22px; /* Adjust the font size as needed */
+    line-height: 1.6; /* Adjust the line height as needed */
+}
+
+.contract-info-1 {
+    display: inline-flex;
+    padding: 10px;
+    width: 35%; /* Adjust the width as needed to leave some space between the two columns */
+    /* margin:5px; */
+    
+ }
+
+ .contract-docs {
+    font-size: 22px;
+    /* display: inline-flex; */
+
+ }
+
+ 
+
+ .links-info{
+    display: inline-block;
+    font-size: 22px;
+    margin: 20px;
+ }
+
+.links-info file-link {
+    padding-right: 10px;
+    margin:20px;
+    margin-right: 20px; /* Add margin between links */
+    color:blue;
+}
+
+
+
+.file-link:hover {
+    text-decoration: underline;
+}
+
+.expand-content strong {
+    font-weight: bold;
+    color: #333; /* Color for strong elements */
+}
+
+.expand-content a {
+    display: block;
+    margin-top: 5px;
+    text-decoration: none;
+    color: #007bff; /* Color for links */
+}
+
+.expand-content a:hover {
+    text-decoration: underline;
+}
+
+.expand-button {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    cursor: pointer;
+    user-select: none; /* Prevent text selection when clicking */
+}
+
+.expand-button::after {
+    content: "\25B6"; /* Unicode for triangle symbol */
+    display: inline-block;
+    margin-left: 5px;
+    transform: rotate(90deg); /* Initially rotate the triangle to point right */
+    transition: transform 0.3s; /* Smooth transition for rotation */
+}
+
+.expanded .expand-button::after {
+    transform: rotate(-90deg); /* Rotate the triangle to point down when expanded */
+}
+
+.payment-status {
+    display: block;
+    margin-top: 10px;
+    overflow-x: auto;
+}
+
+.payment-status strong{
+    font-size: 30px;
+}
+
+
+.data-rows {
+    display: flex;
+    padding: 0px;
+}
+
+.labels {
+    flex-grow: 0;
+    padding: -10px;
+}
+
+.months-data {
+    flex-grow: 3;
+}
+
+.month-headers, .info-row {
+    display: flex;
+    max-width:500px;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.month-column {
+    flex: 1;
+    padding: 5px;
+    text-align: center;
+}
+
+.info-label {
+    display: block;
+    margin-bottom: 12px; /* Adjust as needed for alignment with rows */
+    font-weight: bold;
+    font-size: 22px;
+}
+
+.status-circle {
+    height: 15px;
+    width: 15px;
+    border-radius: 50%;
+    display: inline-block;
+    margin: auto;
+}
+
+.status-circle.green {
+    background-color: #4CAF50; /* Green */
+}
+
+.status-circle.yellow {
+    background-color: #FFEB3B; /* Yellow */
+}
+
+.status-circle.red {
+    background-color: #F44336; /* Red */
+}
+
+
+.expand-button {
+    background-color: #007BFF;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.expand-content {
+    margin-top: 20px;
+    border-top: 1px solid #ccc;
+    padding-top: 20px;
 }

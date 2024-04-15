@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Contracts{% endblock %}
+
+{% block content %}
+    <nav>
+        <ul>
+            
+            <li><a href="{{ url_for('view_contracts') }}">Contracts</a></li>
+            <li><a href="{{ url_for('view_users') }}">Users</a></li>
+            <li><a href="{{ url_for('view_wages') }}">Wages</a></li>
+            <li><a href="{{ url_for('admin_contract_docs') }}">Contract Docs</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            
+        </ul>
+    </nav>
+ 
+    <h1>List of Contract Documents</h1>
+    
+    {% for contract in contracts %}
+    <div class="contract">
+        <div class="contract-info">
+            <div class="contract-no">
+                <strong>Contract No: {{ contract.contract_no }} </strong>
+            </div>
+            <br>
+            <div class="description">
+                <strong>Description: </strong> {{ contract.contract_description }}
+            </div>
+            <!-- Add other contract info fields as needed -->
+        </div>
+
+     
+
+        <div class="expand-content">
+            
+            
+            <div class="contract-info-1">
+                <strong>EIC PB NO:</strong> {{ contract.eic_pbno }}
+            </div>
+
+            <div class="contract-info-1">
+                <strong>Contract Type:</strong> {{ contract.contract_type }}
+            </div>
+
+            <div class="contract-info-1">
+                <strong>Start Date:</strong> {{ contract.start_date }}
+            </div>
+
+            <div class="contract-info-1">
+                <strong>Vendor Name:</strong> {{ contract.vendor_name }}
+            </div>
+            <!-- Additional content to be expanded -->
+            <!-- You can add more contract details or other information here -->
+        </div>
+
+        <div class="contract-docs">
+            <div class="heading">
+                <strong>Contract Documents:</strong> 
+            </div>
+
+            {% set results = [true] %}  <!-- Use an array to overcome scoping issues -->
+
+            {% for file_path in contract_files[contract.contract_no] %}
+                <div class="links-info">
+                    {% if file_path %}
+                        <a class="file-link" href="{{ url_for('download', path=file_path) }}">
+                            {{ file_path.split('\\')[-1].split(".")[0] }}
+                        </a>
+                        {% if results[0] %}  <!-- Check the first element of the array -->
+                            {% set _dummy = results.pop() %}  <!-- Remove true -->
+                            {% set _dummy = results.append(false) %}  <!-- Append false -->
+                        {% endif %}
+                    {% else %}
+                        <span class="empty-cell">&nbsp;</span>  <!-- Represents an empty cell -->
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            {% if results[0] %}  <!-- Check if the flag is still true -->
+                <span > <strong style="color: brown"> No Documents uploaded by EIC.</strong> </span>
+            {% endif %}
+
+            
+        </div>
+
+        {% if payment_table_html %}
+            <div class="payment-status">
+                <strong>Payment Status by Month:</strong>
+                <!-- Insert HTML representation of DataFrame here -->
+                {{ payment_table_html | safe }}
+            </div>
+        {% endif %}
+
+        <div class="expand-button"></div>
+    </div>
+    {% endfor %}
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var expandButtons = document.querySelectorAll(".expand-button");
+            expandButtons.forEach(function(button) {
+                button.addEventListener("click", function() {
+                    var contract = this.parentElement;
+                    var content = contract.querySelector(".expand-content");
+                    contract.classList.toggle("expanded");
+                    content.style.display = content.style.display === "none" ? "block" : "none";
+                });
+            });
+        });
+    </script>
+
+{% endblock %}

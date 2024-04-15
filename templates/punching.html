@@ -16,13 +16,20 @@
             width: 2em; /* Adjust width as needed */
         }
 
+        .invalid {
+                border: 2px solid red; /* Add a red border to highlight invalid input */
+            }
+
       
     </style>
 </head>
 <body>
     <div class="container"  style="margin-left: 0;">
         <h2>Editable DataFrame with Hover Info</h2>
-        <form method="POST" action="/punching_data">
+        <form id="dataForm" method="POST" action="/punching_data">
+            <button id="finalSubmissionBtn" name="final_submission"  type="button" class="btn btn-primary btn-lg">FINAL SUBMISSION</button>
+            <input type="hidden" name="final_submission" id="finalSubmissionInput">
+            <br><br>
             <table id="editable" class="table table-bordered table-hover">
                 <thead>
                     <tr>
@@ -50,8 +57,93 @@
             <input type="submit" value="Submit">
         </form>
     </div>
-
+    
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('dataForm');
+            const hoverData = {{ hover_data|safe }};
+            const cells = document.querySelectorAll('table#editable td.editable-cell');
+        
+            // Function to perform data validation
+            function validateData() {
+                const cells = document.querySelectorAll('.editable-cell input[type="text"]');
+                let valid = true;
+        
+                cells.forEach(function (cell) {
+                    const value = cell.value.trim().toUpperCase();
+                    if (!['P++', 'P+', 'PP', 'PA', 'AP', 'AA'].includes(value)) {
+                        valid = false;
+                        cell.classList.add('invalid'); // Add a class to highlight invalid input
+                    } else {
+                        cell.classList.remove('invalid'); // Remove the class if input is valid
+                    }
+                });
+        
+                return valid;
+            }
+        
+            // Event listener for form submission
+            form.addEventListener('submit', function (event) {
+                const isValid = validateData();
+        
+                if (!isValid) {
+                    alert('Invalid input detected. Only PP, PA, AP, AA are allowed. Check Caps Lock.');
+                    event.preventDefault(); // Prevent form submission if there's invalid input
+                }
+            });
+        
+            // Event listeners for cell hover info
+            cells.forEach(function (cell, index) {
+                cell.addEventListener('click', function () {
+                    var rowIndex = this.parentElement.rowIndex - 1; // Adjusting for header row
+                    var colIndex = this.cellIndex - 1;
+                    var cellData = hoverData[rowIndex];
+                    var info = cellData[colIndex];
+        
+                    var existingHoverInfo = document.getElementById('hoverInfo_' + index);
+                    if (!existingHoverInfo) {
+                        var hoverInfo = document.createElement('div');
+                        hoverInfo.className = 'hover-info';
+                        hoverInfo.id = 'hoverInfo_' + index;
+                        hoverInfo.innerHTML = info;
+                        document.body.appendChild(hoverInfo);
+        
+                        var cellPos = this.getBoundingClientRect();
+                        hoverInfo.style.top = cellPos.top + window.scrollY + cellPos.height + 'px';
+                        hoverInfo.style.left = cellPos.left + window.scrollX + 'px';
+                    } else {
+                        existingHoverInfo.innerHTML = info;
+                        existingHoverInfo.style.display = 'block';
+                    }
+                });
+        
+                cell.addEventListener('mouseleave', function () {
+                    var hoverInfo = document.getElementById('hoverInfo_' + index);
+                    if (hoverInfo) {
+                        hoverInfo.style.display = 'none';
+                    }
+                });
+            });
+        
+            // Event listener for "FINAL SUBMISSION" button
+            const finalSubmissionBtn = document.getElementById('finalSubmissionBtn');
+            finalSubmissionBtn.addEventListener('click', function () {
+                // Validate the data
+                const isValid = validateData();
+        
+                // If data is valid, submit the form
+                if (isValid) {
+                    form.submit(); // Manually trigger form submission
+                } else {
+                    alert('Invalid input detected. Only PP, PA, AP, AA are allowed. Check Caps Lock.');
+                    event.preventDefault();
+                }
+            });
+        });
+
+    </script>
+
+    <!-- <script>
         document.addEventListener('DOMContentLoaded', function () {
             var hoverData = {{ hover_data|safe }};
             var cells = document.querySelectorAll('table#editable td.editable-cell');
@@ -90,6 +182,79 @@
                 });
             });
         });
-    </script>
+
+    //     document.addEventListener('DOMContentLoaded', function () {
+    //     const form = document.getElementById('dataForm');
+    //     form.addEventListener('submit', function (event) {
+    //         const cells = document.querySelectorAll('.editable-cell input[type="text"]');
+    //         let valid = true;
+
+    //         cells.forEach(function (cell) {
+    //             const value = cell.value.trim();
+    //             if (!['P++','P+','PP', 'PA', 'AP', 'AA'].includes(value)) {
+    //                 valid = false;
+    //                 cell.classList.add('invalid'); // Add a class to highlight invalid input
+    //             } else {
+    //                 cell.classList.remove('invalid'); // Remove the class if input is valid
+    //             }
+    //         });
+
+    //         if (!valid) {
+    //             alert('Invalid input detected. Only PP, PA, AP, AA are allowed.Check Caps Lock.');
+    //             event.preventDefault(); // Prevent form submission if there's invalid input
+    //         }
+    //     });
+    // });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('dataForm');
+
+            // Function to perform data validation
+            function validateData() {
+                const cells = document.querySelectorAll('.editable-cell input[type="text"]');
+                let valid = true;
+
+                cells.forEach(function (cell) {
+                    const value = cell.value.trim().toUpperCase();
+                    if (!['P++', 'P+', 'PP', 'PA', 'AP', 'AA'].includes(value)) {
+                        valid = false;
+                        cell.classList.add('invalid'); // Add a class to highlight invalid input
+                    } else {
+                        cell.classList.remove('invalid'); // Remove the class if input is valid
+                    }
+                });
+
+                return valid;
+            }
+
+            form.addEventListener('submit', function (event) {
+                const isValid = validateData();
+
+                if (isValid) {
+                    form.submit(); // Manually trigger form submission
+                } else {
+                    alert('Invalid input detected. Only PP, PA, AP, AA are allowed. Check Caps Lock.');
+                    event.preventDefault(); // Prevent form submission if there's invalid input
+                 }
+            });
+
+             // Event listener for "FINAL SUBMISSION" button
+            const finalSubmissionBtn = document.getElementById('finalSubmissionBtn');
+            finalSubmissionBtn.addEventListener('click', function () {
+                // Validate the data
+                const isValid = validateData();
+
+                // If data is valid, submit the form
+                if (isValid) {
+                    form.submit(); // Manually trigger form submission
+                } else {
+                    alert('Invalid input detected. Only PP, PA, AP, AA are allowed. Check Caps Lock.');
+                    event.preventDefault();
+                }
+            });
+        });
+
+    
+    </script> -->
 </body>
 </html>
