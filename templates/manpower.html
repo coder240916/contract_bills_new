@@ -74,6 +74,10 @@
             <input type="text" id="bank_acc_ifsc_code" name="bank_acc_ifsc_code" required><br>
         </div>
 
+        <div class="form-row">
+            <label for="aadhaar_no">AADHAAR NO:</label>
+            <input type="text" id="aadhaar_no" name="aadhaar_no" required><br>
+        </div>
 
         <input type="submit" value="Add Manpower">
     </form>
@@ -102,6 +106,7 @@
                 <th>Date of Joining</th>
                 <th>Emp Category</th>
                 <th>Bank IFSC Code</th>
+                <th>Aadhaar No</th>
                 
                 <!-- Add more headers for contract_type, start_date, duration_months, bill_frequency as needed -->
                 <th>Actions</th>
@@ -119,6 +124,7 @@
                     <td>{{ employee.date_of_joining }}</td>
                     <td>{{ employee.emp_category }}</td>
                     <td>{{ employee.bank_acc_ifsc_code }}</td>
+                    <td>{% if employee.aadhaar_no %} {{ employee.aadhaar_no }} {% else %} {{ "" }} {% endif %}</td>
                     <!-- Add more cells for contract_type, start_date, duration_months, bill_frequency as needed -->
                     <td>
                         <!-- Delete Form -->

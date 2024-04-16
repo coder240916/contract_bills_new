@@ -50,6 +50,7 @@ class ContractEmployee(db.Model):
     date_of_joining = db.Column(db.Date)
     emp_category = db.Column(db.String, CheckConstraint('emp_category IN ("skilled","semi-skilled","unskilled")'))
     bank_acc_ifsc_code = db.Column(db.String)
+    aadhaar_no = db.Column(db.Integer)
 
     contract = db.relationship("Contract", back_populates="employees")
 

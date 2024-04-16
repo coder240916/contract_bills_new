@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 
 from datetime import datetime,timedelta
 
@@ -194,6 +195,15 @@ def process_punch_df(file_path,month,year):
 
     return punch_df,hover_df
 
+def get_saved_punch_data(filename):
+    print(filename)
+    if os.path.exists(filename):
+    #   print("Running the function")
+      punch_df = pd.read_csv(filename)
+      return punch_df
+    else:
+      return None
+   
 
 if __name__ == "__main__":
    attendance_df,punch_data_df =  process_punch_df("utils/punch_data.xlsx",3,2024)

@@ -6,7 +6,7 @@ from datetime import datetime,date
 
 from sqlalchemy import and_,distinct
 from utils.app_db_operations import insert_or_update_bills_boq_lines, insert_or_update_contract_bill
-from utils.punch_processing import process_punch_df
+from utils.punch_processing import process_punch_df, get_saved_punch_data
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_file
 from sqlalchemy.exc import SQLAlchemyError
@@ -333,13 +333,23 @@ with app.app_context():
         if 'user_id' in session or "eic_user_id" not in session :
             return redirect(url_for('login'))
         
+        
         punch_df,hover_df = process_punch_df("utils/punch_data.xlsx",3,2024)
         punch_df.reset_index(inplace=True)
+        
+        saved_punch_data = get_saved_punch_data("utils/updated_punch_data.csv")
+        
+
+        if saved_punch_data is not None:
+            punch_df = saved_punch_data
+            print(str(punch_df))
+
+        
         # print(str(punch_df))
         
         if request.method == 'POST':
         # Update DataFrame with edited values
-            print(request.form)
+            # print(request.form)
             for key in request.form:
                 # print(key)
                 if 'cell' in key:
@@ -349,7 +359,7 @@ with app.app_context():
         hover_data = [[[str(x) for x in dt] if dt != "No Punch" else "No Punch" for dt in sublist ] for sublist in hover_df.values.tolist() ]
 
         if 'final_submission' in request.form:
-            print(request.form)
+            # print(request.form)
             # Save the updated DataFrame to a CSV file
             #punch_df.to_csv('updated_punch_data.csv', index=False)  # Change the file pa
             punch_df.to_csv('utils/updated_punch_data.csv', index=False) 
