@@ -1,19 +1,7 @@
-dashboard.html
-  
-  <!--<nav>
-        
-        <ul>
-            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-            <li><a href="{{ url_for('add_contract_emp') }}">Contract Manpower</a></li>
-            <li><a href="{{ url_for('attendance') }}">Attendance</a></li>
-            <li><a href="{{ url_for('create_bill') }}">Create Bill</a></li>
-            <li><a href="{{ url_for('view_bills') }}">View Bills</a></li>
-            <li><a href="{{ url_for('contract_docs') }}">Contract Docs</a></li>
-        </ul>
-    </nav>-->
+app_db_operations 
+      added check_for_values fucntion
+      check_invoice_in_bills_tables fucntions
 
-attendance_form.html
-
-    {% if session_attendance_data %}
-            <h2> Attendance for the month of {{ session_attendance_data['month_name'] }} - {{ session_attendance_data['year] }} </h2>
-    {% endif %}
+app.py/bill_docs
+    line 623 to 626
+    line 545 to 549

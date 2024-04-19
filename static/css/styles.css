@@ -350,12 +350,15 @@ input[type="submit"] {
 }
 
 .contract-info-1 {
-    display: inline-flex;
+    display:flex;
     padding: 10px;
-    width: 35%; /* Adjust the width as needed to leave some space between the two columns */
+    width: 25%; /* Adjust the width as needed to leave some space between the two columns */
     /* margin:5px; */
     
+    
+    
  }
+
 
  .contract-docs {
     font-size: 22px;
@@ -363,7 +366,6 @@ input[type="submit"] {
 
  }
 
- 
 
  .links-info{
     display: inline-block;

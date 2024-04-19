@@ -2,7 +2,7 @@
 {% block title %}Contracts{% endblock %}
 
 {% block content %}
-    <nav>
+    <!-- <nav>
         <ul>
             
             <li><a href="{{ url_for('view_contracts') }}">Contracts</a></li>
@@ -12,7 +12,7 @@
             <li><a href="{{ url_for('logout') }}">Logout</a></li>
             
         </ul>
-    </nav>
+    </nav> -->
  
     <h1>List of Contract Documents</h1>
     
@@ -43,11 +43,33 @@
             </div>
 
             <div class="contract-info-1">
+                <strong>Vendor Name:</strong> {{ contract.vendor_name }}
+            </div>
+
+            <div class="contract-info-1">
                 <strong>Start Date:</strong> {{ contract.start_date }}
             </div>
 
             <div class="contract-info-1">
-                <strong>Vendor Name:</strong> {{ contract.vendor_name }}
+                <strong>End Date:</strong> {{ contract.start_date }}
+            </div>
+
+            
+
+            <div class="contract-info-1">
+                <strong>Contract Value:</strong> Rs.{{ contract.contract_value }}
+            </div>
+
+            <div class="contract-info-1">
+                <strong>GEM Contract NO:</strong> {{ contract.gem_contract_no }}
+            </div>
+
+            <div class="contract-info-1">
+                <strong>Contract Value:</strong> Rs.{{ contract.contract_value }}
+            </div>
+
+            <div class="contract-info-1">
+                <strong>GEM Contract NO:</strong> {{ contract.gem_contract_no }}
             </div>
             <!-- Additional content to be expanded -->
             <!-- You can add more contract details or other information here -->

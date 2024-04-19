@@ -2,6 +2,7 @@ from data_model_flask_alchemy import db
 from sqlalchemy.exc import SQLAlchemyError
 
 from data_model_flask_alchemy import BillsBoqLines,ContractBills
+from sqlalchemy import and_
 
 
 # Function to insert or update a record based on primary keys
@@ -56,3 +57,35 @@ def insert_or_update_contract_bill(ge_no, contract_no, rar_no, invoice_no, invoi
     except Exception as e:
         db.session.rollback()
         return f"Error occurred: {str(e)}"  # Indicates failure
+
+
+def check_values_exists_in_bills_table(session):
+    print(session["checklist_data"])
+
+    # conditions = and_(
+    #                     ContractBills.contract_no != session["checklist_data"].get("contract_no"),
+    #                     # ContractBills.ge_no == session["checklist_data"].get("ge_no"),
+    #                     # ContractBills.rr_no == session["checklist_data"].get("rr_no")
+    #                 )
+    
+    results = db.session.query(ContractBills).filter(ContractBills.contract_no != session["checklist_data"].get("contract_no")).all()
+    print(results)
+
+    for result in results:
+        # print(result.ge_no,session["checklist_data"].get("ge_no"))
+        if result.ge_no == session["checklist_data"].get("ge_number"):
+            return f"Entered Gate Entry No already exists with Contract No:{result.contract_no},RAR NO:{result.rar_no}"
+        elif result.rr_no == session["checklist_data"].get("rr_no"):
+            return f"Entered RR No already exists with Contract No:{result.contract_no},RAR NO:{result.rar_no}"
+    else:
+        return False
+    
+def check_invoice_in_bills_tables(session):
+    results = db.session.query(ContractBills).filter(ContractBills.contract_no != session["rar_abstract_data"].get("contract_no")).all()
+    for result in results:
+        # print(result.ge_no,session["checklist_data"].get("ge_no"))
+        if result.invoice_no == session["rar_abstract_data"].get("invoice_no"):
+            return f"Entered INVOICE No already exists with Contract No:{result.contract_no},RAR NO:{result.rar_no}"
+        
+    else:
+        return False

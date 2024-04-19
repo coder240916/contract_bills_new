@@ -171,12 +171,28 @@ def generate_attendance_data(selected_month, year=2024, employees=None):
     #     combined_data[key] = zip(attendance_data[key], attendance_data['sunday'])
     return attendance_data
 
+def map_values(value):
+    if value == "PP":
+        return 1
+    elif value in ["AP","PP"]:
+        return 0.5
+    else:
+        return 0
+    
+def get_punching_values(filename):
+    punch_data = pd.read_csv(filename)
+    punch_df = punch_data.map(map_values)
+    values = punch_df[punch_df.columns[1:-1]].values.tolist() 
+    return values
 
 def generate_attendance_data_df(employees,month,year,contract_no,values=None):
     dates = pd.date_range(start=f"{year}-{month}-01", end=pd.Period(f"{year}-{month}").end_time, freq='D')
     attendance_data = pd.DataFrame(columns=employees,index=dates).reset_index().rename(columns={"index":"date"})
     attendance_data["sunday"] = attendance_data["date"].dt.day_name().apply(lambda x:"sunday" if x == "Sunday" else "weekday")
     attendance_data["date_format"] = attendance_data["date"].dt.strftime("%d/%m")
+    attendance_folder = os.path.join(BILLS_FOLDER_PATH,contract_no,"attendance")
+    punch_data_filename = os.path.join(attendance_folder,"updated_punch_data.csv")
+
     if values == None:
         attendance_folder = os.path.join(BILLS_FOLDER_PATH, contract_no, "attendance")
         file_path = os.path.join(attendance_folder,f"{month}-{year}.csv")
@@ -187,7 +203,9 @@ def generate_attendance_data_df(employees,month,year,contract_no,values=None):
             values = [list(data[col].values) for col in employees]
 
         except:
-            values = [[1 if day != "sunday" else 0 for day in attendance_data["sunday"]] for _ in range(len(employees))]
+            values = get_punching_values(punch_data_filename)
+
+            #values = [[1 if day != "sunday" else 0 for day in attendance_data["sunday"]] for _ in range(len(employees))]
 
     present_days = ["total_days"]
 

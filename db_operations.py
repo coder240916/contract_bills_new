@@ -1,4 +1,4 @@
-from data_model_flask_alchemy import Contract, User, ContractEmployee, ManpowerWage, Department, db, BillOfQuantities
+from data_model_flask_alchemy import Contract, User, ContractEmployee, ManpowerWage, Department, db, BillOfQuantities, ContractBills
 from sqlalchemy import and_,distinct
 
 from app import app
@@ -10,8 +10,8 @@ from datetime import datetime
 if __name__ == "__main__":
 
     with app.app_context():
-        contracts = db.session.query(Contract).all()
-        print([contract.contract_no for contract in contracts])
+        bills = db.session.query(ContractBills).all()
+        print(bills)
          #boq_lines = BillOfQuantities.query.filter(BillOfQuantities.contract_no=="22SNSJO-373").order_by(BillOfQuantities.sl_no).all()
         #  boq_lines = db.session.query(BillOfQuantities).filter(BillOfQuantities.contract_no == "22SNCJO-373").all()
         #  print([[boq_line.sl_no,boq_line.description] for boq_line in boq_lines])

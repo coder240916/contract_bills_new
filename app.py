@@ -5,7 +5,7 @@ import pandas as pd
 from datetime import datetime,date
 
 from sqlalchemy import and_,distinct
-from utils.app_db_operations import insert_or_update_bills_boq_lines, insert_or_update_contract_bill
+from utils.app_db_operations import insert_or_update_bills_boq_lines, insert_or_update_contract_bill, check_values_exists_in_bills_table,check_invoice_in_bills_tables
 from utils.punch_processing import process_punch_df, get_saved_punch_data
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_file
@@ -444,6 +444,7 @@ with app.app_context():
         target_data = generate_attendance_data_df(employees,month,year,contract_no,values)
        
         data = pd.DataFrame(target_data).iloc[:-1,:]
+        
         status_msg = attendance_to_csv(month,year,contract_no,data)
 
 
@@ -475,6 +476,8 @@ with app.app_context():
             emp_categories = session["attendance_data"].get("skill_categories")
 
             result_df, sunday_list = attendance_processing(month,year,contract_no, emp_categories)
+            print(str(result_df))
+            print(sunday_list)
 
             total_pay_days = result_df["TOTAL PAY DAYS"].sum()
 
@@ -539,6 +542,11 @@ with app.app_context():
                                             "invoice_date":fixed_form.invoice_date.data,
                                             "selected_month":request.form["month_select"]}
             
+            check_invoice_exists = check_invoice_in_bills_tables(session)
+            if check_invoice_exists:
+                flash(check_invoice_exists,"error")
+                return render_template('rar_page.html', fixed_form=fixed_form, dynamic_form=dynamic_form,present_rar_qty=present_rar_qty)
+
             boq_lines = db.session.query(BillOfQuantities).filter(BillOfQuantities.contract_no == "22SNCJO-373").all()
             unique_descriptions = [[boq_line.sl_no,boq_line.description] for boq_line in boq_lines]
             dynamic_form = create_dynamic_form(unique_descriptions)
@@ -605,18 +613,19 @@ with app.app_context():
 
             checklist_form_data = get_checklist_form_data(contract)
 
-            
-
-            if "checklist_field_1" in request.form and fixed_form.validate():
-
-                session["checklist_data"] = {"contract_no":fixed_form.contract_no.data,
+            session["checklist_data"] = {"contract_no":fixed_form.contract_no.data,
                                             "ge_number":fixed_form.ge_number.data,
                                             "ge_date":fixed_form.ge_date.data.strftime("%d-%m-%Y"),
                                             "rr_no":fixed_form.rr_no.data,
                                             "rar_no":fixed_form.rar_no.data,
                                             "selected_month":request.form["month_select"]}
-                
-                print(request.form)
+
+            check_status = check_values_exists_in_bills_table(session)
+            if check_status:
+                flash(check_status,"error")
+                return render_template('bill_docs_form.html', fixed_form=fixed_form, checklist_form_data=None,undertaking_form_data=None)
+
+            if "checklist_field_1" in request.form and fixed_form.validate():
 
                 user_entered_values = [request.form[f"checklist_field_{i}"].replace(r"\s+"," ") for i in range(1,39)]
 
@@ -778,7 +787,12 @@ with app.app_context():
         
         #contract_files = get_contract_docs_data()
         contracts = db.session.query(Contract).all()
+
+        for contract in contracts:
+            contract.contract_description = contract.contract_description.title()
+
         contract_files = {contract.contract_no: generate_download_links(contract.contract_no) for contract in contracts}
+        
         payment_df = generate_sample_df()
         
         status_map = {'Green': '<div class="status-circle green"></div>',
