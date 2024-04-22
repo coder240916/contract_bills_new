@@ -7,6 +7,7 @@ from datetime import datetime,date
 from sqlalchemy import and_,distinct
 from utils.app_db_operations import insert_or_update_bills_boq_lines, insert_or_update_contract_bill, check_values_exists_in_bills_table,check_invoice_in_bills_tables
 from utils.punch_processing import process_punch_df, get_saved_punch_data
+from utils.attendance_form import read_punching_data
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_file
 from sqlalchemy.exc import SQLAlchemyError
@@ -368,6 +369,65 @@ with app.app_context():
         #                         header="true", table_id="editable")
         return render_template('punching.html', punch_df=punch_df, hover_data=hover_data)
 
+    # attendance endpoint
+    @app.route("/attendance1",methods=["GET","POST"])
+    def attendance1():
+        if 'user_id' in session or "eic_user_id" not in session :
+            return redirect(url_for('login'))
+        
+        month_dict = get_prev_months()
+        
+        present_month = date.today().month
+        month_dict.pop(get_month_name(present_month))   
+
+        contracts = db.session.query(Contract).filter(Contract.eic_pbno == session["eic_user_id"])
+
+        if request.method == "POST":
+            month,year = request.form["month_select"].split("-")
+            selected_month = request.form["month_select"]
+        
+            contract_no = request.form["contract_select"]
+            nh_days = int(request.form["nh_days"])
+
+            month_name = get_month_name(int(month))
+
+            selected_values = {"selected_month":selected_month,"selected_contract_no":contract_no,"selected_nh_days":nh_days,"month_name":month_name,"year":year}
+
+            attendance_df,sunday_columns = read_punching_data(nh_days)
+            
+            
+            return render_template("attendance_form_1.html",month_dict=month_dict,contracts=contracts,selected_values=selected_values,
+                                   attendance_df=attendance_df,sunday_columns=sunday_columns)
+
+
+        return render_template("attendance_form_1.html",month_dict=month_dict,contracts=contracts)
+            
+
+    # download attendance form
+    @app.route("/download_attendance1",methods=["POST"])
+    def download_attendance1():
+
+        wages_data = ManpowerWage.query.all()
+        wages_list = [[wage.emp_category.upper(),float(wage.wage)] for wage in wages_data]
+        wages = pd.DataFrame(wages_list,columns=["CATEGORY","Wage per day"])
+
+        
+        #wages = pd.DataFrame({"CATEGORY":['SKILLED',"SEMI-SKILLED","UNSKILLED"],"Wage per day":[709,589,504]})
+
+        if request.method == "POST":
+            prof_tax = float(request.form["prof_tax"])
+            ld = float(request.form["ld"])
+            penalty = float(request.form["penalty"])
+            taxes = float(request.form["taxes"])
+            other_recovery = float(request.form["other_recovery"])
+
+            month, year = session["attendance_data"].get("month"), session["attendance_data"].get("year")
+            contract_no = session["attendance_data"].get("contract_no")
+            emp_categories = session["attendance_data"].get("skill_categories")
+
+            result_df, sunday_list = attendance_processing(month,year,contract_no, emp_categories)
+
+        return "downloaded"
 
     # attendance endpoint
     @app.route("/attendance",methods=["GET","POST"])
@@ -467,9 +527,6 @@ with app.app_context():
             penalty = float(request.form["penalty"])
             taxes = float(request.form["taxes"])
             other_recovery = float(request.form["other_recovery"])
-
-            service_charges = 250
-            # ld,penalty,taxes,other_recovery = 0,0,0,0
             
             month, year = session["attendance_data"].get("month"), session["attendance_data"].get("year")
             contract_no = session["attendance_data"].get("contract_no")

@@ -97,7 +97,7 @@ td form {
 
 /* Headings */
 h1,h2, h3 {
-    width: 500%;
+    width: 100%;
     background-color: #f2f2f2; /* Background color for headings */
     /*border-bottom: 2px solid black; /* Border at the bottom of headings */
     padding: 5px 0; /* Padding for spacing */
@@ -136,7 +136,6 @@ h1,h2, h3 {
     display: block; 
     background-color: blue;
     color: white;
-    padding: 10px 20px;
     border: none;
     cursor: pointer;
     padding: 20px 40px;
@@ -164,8 +163,10 @@ h1,h2, h3 {
 }
 
 
+
 .styled-form {
     width: 500px; /* Adjust width as needed */
+    padding:10px;
 }
 
 .form-row {
@@ -173,6 +174,8 @@ h1,h2, h3 {
     align-items: center;
     margin-bottom: 20px;
     height:25px;
+    
+
 }
 
 

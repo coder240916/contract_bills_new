@@ -215,7 +215,7 @@ def generate_attendance_data_df(employees,month,year,contract_no,values=None):
 
     present_days.extend(["weekday","DP"])
     attendance_data.loc["total"] = present_days
-    print(attendance_data)
+    
     attendance_dict = {col:list(attendance_data[col].values) for col in attendance_data.columns[1:] }
 
     return attendance_dict

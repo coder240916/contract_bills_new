@@ -1,11 +1,16 @@
 import pandas as pd
 import os
 
+from datetime import datetime
+
 from openpyxl import load_workbook
 from openpyxl.styles import Border,Side,Alignment,Font,PatternFill
 
+
 BILLS_FOLDER_PATH = os.path.join("bill docs")
 ATTENDANCE_TEMPLATE_PATH = "bill_templates/attendance.xlsx"
+
+
 
 def custom_sort(skill_category):
     if skill_category == "SKILLED":
@@ -14,6 +19,38 @@ def custom_sort(skill_category):
         return 2
     else:
         return 3
+
+def map_values(value):
+    if value == 'PP':
+        return 1
+    elif value == 'AA':
+        return 0
+    elif value in ["AP","PA"] :  # Assuming PA or AP
+        return 0.5  
+    else:
+        return value
+
+def read_punching_data(nh_days):
+    attendance_df = pd.read_csv("utils/updated_punch_data.csv")
+    # print(str(attendance_df))
+    attendance_df = attendance_df.map(map_values)
+    # print(str(attendance_df))
+    attendance_df["NH Days"] = nh_days
+
+    df_columns = attendance_df.columns.tolist()
+
+    sunday_columns = []
+    for col in df_columns:
+        try:
+            if datetime.strptime(col, "%d/%m").weekday() == 5:  # 6 is Sunday
+                sunday_columns.append(col)
+
+        except ValueError:
+            pass
+    
+    attendance_df.loc[:,sunday_columns] = "S"
+    return attendance_df,sunday_columns
+
 
 def attendance_processing(month, year, contract_no, emp_categories):
     # Read csv file
@@ -68,6 +105,7 @@ def attendance_processing(month, year, contract_no, emp_categories):
     result_df = result_df.sort_values(by="CATEGORY",key=lambda x:x.map(custom_sort))
     result_df["SL.No"] = range(1, len(result_df) + 1)
     result_df = pd.concat([result_df.iloc[:, -1:], result_df.iloc[:, :-1]], axis=1).reset_index(drop=True)
+    print(str(result_df))
 
     return result_df, sunday_list
 
